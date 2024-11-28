@@ -14,18 +14,149 @@ import ForgotPasswordScreen from './auth/forgotpassword';
 import RegisterScreen from './auth/registeraccount';
 
 import SupportScreen from './screens/support';
+import AboutMedscredScreen from './screens/aboutmedscred';
+import TermsConditionsScreen from './screens/termscondition';
+import NotificationScreen from './screens/notification';
+import MyProfileDetailScreen from './screens/profiledetails/[id]';
+import AddPatientScreen from './screens/addpatient';
 
 import DashboardScreen from "."
+import ProfileScreen from "./profile"
+import PatientsScreen from "./patients"
+import LoansScreen from "./loans"
 
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 
-const DashboardStack = () => { };
-const PatientStack = () => { };
+const DashboardStack = () => {
+    return (
+        <Stack.Navigator
+            screenOptions={{
+                gestureEnabled: true,
+                transitionSpec: {
+                    open: { animation: 'timing', config: { duration: 200 } },
+                    close: { animation: 'timing', config: { duration: 200 } },
+                },
+                cardStyleInterpolator: ({ current, layouts }) => ({
+                    cardStyle: {
+                        opacity: current.progress,
+                        transform: [{
+                            translateX: current.progress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [layouts.screen.width, 0],
+                            }),
+                        }],
+                    },
+                }),
+            }}
+        >
+            <Stack.Screen
+                name="index"
+                component={DashboardScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="Notification"
+                component={NotificationScreen}
+                options={{ headerShown: false }}
+            />
+        </Stack.Navigator>
+    )
+};
+const PatientStack = () => {
+    return (
+        <Stack.Navigator
+            screenOptions={{
+                gestureEnabled: true,
+                transitionSpec: {
+                    open: { animation: 'timing', config: { duration: 200 } },
+                    close: { animation: 'timing', config: { duration: 200 } },
+                },
+                cardStyleInterpolator: ({ current, layouts }) => ({
+                    cardStyle: {
+                        opacity: current.progress,
+                        transform: [{
+                            translateX: current.progress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [layouts.screen.width, 0],
+                            }),
+                        }],
+                    },
+                }),
+            }}
+        >
+            <Stack.Screen
+                name="index"
+                component={PatientsScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="AddPatient"
+                component={AddPatientScreen}
+                options={{ headerShown: false }}
+            />
+        </Stack.Navigator>
+    )
+};
 const LoanStack = () => { };
-const ProfileStack = () => { };
+
+const ProfileStack = () => {
+    return (
+        <Stack.Navigator
+            screenOptions={{
+                gestureEnabled: true,
+                transitionSpec: {
+                    open: { animation: 'timing', config: { duration: 200 } },
+                    close: { animation: 'timing', config: { duration: 200 } },
+                },
+                cardStyleInterpolator: ({ current, layouts }) => ({
+                    cardStyle: {
+                        opacity: current.progress,
+                        transform: [{
+                            translateX: current.progress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [layouts.screen.width, 0],
+                            }),
+                        }],
+                    },
+                }),
+            }}
+        >
+            <Stack.Screen
+                name="home"
+                component={ProfileScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="Support"
+                component={SupportScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="TermsConditions"
+                component={TermsConditionsScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="AboutMedsCred"
+                component={AboutMedscredScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="MyProfileDetail"
+                component={MyProfileDetailScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="Notification"
+                component={NotificationScreen}
+                options={{ headerShown: false }}
+            />
+        </Stack.Navigator>
+    )
+};
 
 export default RootLayout = () => {
     return (
@@ -76,10 +207,8 @@ function AppNavigator() {
 
                     if (route.name === 'Dashboard') {
                         iconName = focused ? 'home' : 'home-outline';
-                    } else if (route.name === 'Hospital') {
-                        iconName = focused ? 'business' : 'business-outline';
-                    } else if (route.name === 'Scan QR') {
-                        iconName = focused ? 'qr-code' : 'qr-code-outline';
+                    } else if (route.name === 'Patients') {
+                        iconName = focused ? 'people' : 'people-outline';
                     } else if (route.name === 'Loans') {
                         iconName = focused ? 'cash' : 'cash-outline';
                     } else if (route.name === 'Profile') {
@@ -99,10 +228,10 @@ function AppNavigator() {
                     borderTopWidth: 0.2,
                     borderLeftWidth: 0.2,
                     borderRightWidth: 0.2,
-                    shadowColor: '#DDE6ED',
-                    shadowOffset: { width: 0, height: -3 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 5,
+                    boxShadowColor: '#DDE6ED',
+                    boxShadowOffset: { width: 0, height: -3 },
+                    boxShadowOpacity: 0.1,
+                    boxShadowRadius: 5,
                     position: 'absolute',
                     elevation: 0,
                     bottom: 0,
@@ -118,7 +247,10 @@ function AppNavigator() {
             })}
 
         >
-            <Tab.Screen name="Dashboard" component={DashboardScreen} />
+            <Tab.Screen name="Dashboard" component={DashboardStack} />
+            <Tab.Screen name="Patients" component={PatientStack} />
+            <Tab.Screen name="Loans" component={LoansScreen} />
+            <Tab.Screen name="Profile" component={ProfileStack} />
         </Tab.Navigator>
     );
 }

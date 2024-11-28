@@ -51,7 +51,8 @@ const LoginScreen = () => {
     };
 
     const onPressRegisterAccount = () => {
-        router.push('auth/registeraccount');
+        // router.push('auth/registeraccount');
+        router.push('screens/support');
     }
     const onPressForgotPassword = () => {
         router.push('auth/forgotpassword');
@@ -59,8 +60,7 @@ const LoginScreen = () => {
 
     return (
         <>
-            <KeyboardAvoidingView style={styles.container}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <KeyboardAvoidingView style={styles.container}>
                 <SafeAreaView style={styles.safeAreaContainer}>
                     <View style={styles.logoContainer}>
                         <Image source={require('../../../assets/logo-color.png')} resizeMode='contain' style={styles.logo} />
@@ -106,11 +106,12 @@ const LoginScreen = () => {
                     <TouchableOpacity style={styles.accountContainer} onPress={onPressRegisterAccount}>
                         <Text style={styles.accountText}>Didn't have an account? <Text style={{ color: '#008AFF' }}>Register</Text></Text>
                     </TouchableOpacity>
-                    <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0 }}>
-                        <Text style={{ textAlign: 'center', fontFamily: 'Lexend_100Thin' }}>MedsCred - v1.0.0</Text>
+                    <View style={{ position: 'absolute', bottom: 10, right: 0, left: 0 }}>
+                        <Text style={{ fontFamily: 'Lexend_100Thin', textAlign: 'center' }}>v1.0.0</Text>
                     </View>
                 </SafeAreaView>
             </KeyboardAvoidingView>
+
         </>
 
     );
@@ -121,7 +122,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         paddingHorizontal: 20,
-        backgroundColor: '#FFF',
+        backgroundColor: '#fff',
     },
     safeAreaContainer: {
         flex: 1,

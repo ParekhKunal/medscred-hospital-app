@@ -22,12 +22,9 @@ const ForgotPasswordScreen = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.headerContainer}>
-                {/* Back Arrow */}
                 <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
                     <Icons name='chevron-left' size={28} color="#000" />
                 </TouchableOpacity>
-
-                {/* Title centered */}
                 <View style={styles.titleContainer}>
                     <Text style={styles.titleText}>Forgot Password</Text>
                 </View>

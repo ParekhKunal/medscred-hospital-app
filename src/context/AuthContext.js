@@ -4,6 +4,8 @@ import axios from 'axios';
 
 const AuthContext = createContext(undefined);
 
+const API_URL = 'https://8f2s3z7k-5500.inc1.devtunnels.ms/api'
+
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
@@ -23,7 +25,7 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         try {
             const response = await axios.post(
-                'https://api.medscred.com/api/v1/auth/login',
+                `${API_URL}/v1/auth/login`,
                 { email, password }
             );
 
