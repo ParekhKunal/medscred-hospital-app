@@ -62,6 +62,16 @@ const DashboardStack = () => {
                 component={NotificationScreen}
                 options={{ headerShown: false }}
             />
+            <Stack.Screen
+                name="AddPatient"
+                component={AddPatientScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="Support"
+                component={SupportScreen}
+                options={{ headerShown: false }}
+            />
         </Stack.Navigator>
     )
 };

@@ -6,7 +6,7 @@ import Header from '../components/header';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { ScrollView } from 'react-native-gesture-handler';
 
-const DashboardScreen = () => {
+const DashboardScreen = ({ navigation }) => {
     const { logout, user } = useAuth();
 
     const handlePressLogout = () => {
@@ -19,7 +19,7 @@ const DashboardScreen = () => {
                 <ScrollView>
                     <Header user={user} />
                     <View style={styles.rowContainerOne}>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={() => navigation.navigate('AddPatient')}>
                             <View style={[styles.boxOne, { backgroundColor: '#F9F5FF' }]}>
                                 <View style={[styles.iconOne, { width: 50, alignItems: 'center' }]}>
                                     <FontAwesome6 name='user-large' size={24} style={{ color: '#254EDB' }} />
@@ -30,7 +30,7 @@ const DashboardScreen = () => {
                                 </View>
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={() => navigation.navigate('Loans')}>
                             <View style={[styles.boxOne, { backgroundColor: '#EDFCF2' }]}>
                                 <View style={[styles.iconOne, { backgroundColor: '#AAF0C4', width: 50, alignItems: 'center' }]}>
                                     <FontAwesome6 name='newspaper' size={24} style={{ color: '#16B364' }} />
@@ -54,7 +54,7 @@ const DashboardScreen = () => {
                                 </View>
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={() => navigation.navigate('Support')}>
                             <View style={[styles.boxOne, { backgroundColor: '#FEF3F2' }]}>
                                 <View style={[styles.iconOne, { backgroundColor: '#FECDCA', width: 50, alignItems: 'center' }]}>
                                     <FontAwesome6 name='phone-volume' size={24} style={{ color: '#F04438' }} />
