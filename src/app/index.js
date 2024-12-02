@@ -51,7 +51,7 @@ const DashboardScreen = ({ navigation }) => {
             <SafeAreaView style={{ backgroundColor: '#fff', flex: 1 }}>
                 <FlatList
                     data={patients}
-                    keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
+                    keyExtractor={(item, index) => (item.patient_id ? item.patient_id.toString() : index.toString())}
                     contentContainerStyle={{ paddingBottom: 16, marginBottom: 80 }}
                     ListHeaderComponent={
                         <>
@@ -81,7 +81,7 @@ const DashboardScreen = ({ navigation }) => {
                                 </TouchableOpacity>
                             </View>
                             <View style={styles.rowContainerTwo}>
-                                <TouchableOpacity>
+                                <TouchableOpacity onPress={() => navigation.navigate('Discharge')}>
                                     <View style={[styles.boxOne, { backgroundColor: '#FEF6EE' }]}>
                                         <View style={[styles.iconOne, { backgroundColor: '#F9DBAF', width: 50, alignItems: 'center' }]}>
                                             <FontAwesome6 name='user-large' size={24} style={{ color: '#EF6820' }} />

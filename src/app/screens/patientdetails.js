@@ -3,7 +3,9 @@ import { StyleSheet, View, SafeAreaView, Text } from 'react-native';
 
 const PatientDetailScreen = ({ route }) => {
 
-    const { id } = route.params
+    const { id } = route.params || {};  // Safely access params
+    console.log(route.params);
+
 
     return (
         <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>

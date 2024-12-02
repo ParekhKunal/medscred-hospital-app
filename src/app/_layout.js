@@ -119,10 +119,49 @@ const PatientStack = () => {
                 component={PatientDetailScreen}
                 options={{ headerShown: false }}
             />
+            <Stack.Screen
+                name="Notification"
+                component={NotificationScreen}
+                options={{ headerShown: false }}
+            />
         </Stack.Navigator>
     )
 };
-const LoanStack = () => { };
+const LoanStack = () => {
+    return (
+        <Stack.Navigator
+            screenOptions={{
+                gestureEnabled: true,
+                transitionSpec: {
+                    open: { animation: 'timing', config: { duration: 200 } },
+                    close: { animation: 'timing', config: { duration: 200 } },
+                },
+                cardStyleInterpolator: ({ current, layouts }) => ({
+                    cardStyle: {
+                        opacity: current.progress,
+                        transform: [{
+                            translateX: current.progress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [layouts.screen.width, 0],
+                            }),
+                        }],
+                    },
+                }),
+            }}
+        >
+            <Stack.Screen
+                name="Discharge"
+                component={LoansScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="Notification"
+                component={NotificationScreen}
+                options={{ headerShown: false }}
+            />
+        </Stack.Navigator>
+    )
+};
 
 const ProfileStack = () => {
     return (
@@ -271,7 +310,7 @@ function AppNavigator() {
         >
             <Tab.Screen name="Dashboard" component={DashboardStack} />
             <Tab.Screen name="Patients" component={PatientStack} />
-            <Tab.Screen name="Discharge" component={LoansScreen} />
+            <Tab.Screen name="Discharge" component={LoanStack} />
             <Tab.Screen name="Profile" component={ProfileStack} />
         </Tab.Navigator>
     );

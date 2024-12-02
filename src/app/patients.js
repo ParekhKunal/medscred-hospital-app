@@ -114,18 +114,18 @@ const PatientsScreen = ({ navigation }) => {
 
             <FlatList
                 data={filteredPatients}
-                keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
+                keyExtractor={(item, index) => (item.patient_id ? item.patient_id.toString() : index.toString())}
                 contentContainerStyle={{ padding: 16 }}
                 renderItem={({ item }) => (
                     <TouchableOpacity
-                        onPress={() => navigation.navigate('PatientDetails', { id: item.id })}
+                        onPress={() => navigation.navigate('PatientDetails', { id: item.patient_id })}
                         accessibilityRole="button"
                         accessibilityLabel={`View details for ${item.first_name} ${item.last_name}`}
                     >
                         <View style={styles.patientCard}>
                             <View>
                                 <Text style={styles.patientName}>
-                                    {`${item.first_name} ${item.middle_name || ''} ${item.last_name}`}
+                                    {`${item.first_name} ${item.middle_name || ''} ${item.last_name} `}
                                 </Text>
                                 <Text style={styles.patientData}>{item.email}</Text>
                                 <Text style={styles.patientData}>{item.phone_number}</Text>
