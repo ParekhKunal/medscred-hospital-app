@@ -18,7 +18,7 @@ const LoansScreen = ({ navigation }) => {
             <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
                 <Header user={user} />
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Text style={{ textAlign: 'center' }}>Loans Screen</Text>
+                    <Text style={{ textAlign: 'center' }}>Discharge Screen</Text>
                 </View>
             </SafeAreaView>
         </>

@@ -146,7 +146,7 @@ const SupportScreen = ({ navigation }) => {
                         </View>
                     </ScrollView>
                     <View>
-                        <TouchableOpacity onPress={onSubmit} style={{ backgroundColor: '#008AFF', padding: 20, borderRadius: 6, marginBottom: 80, position: 'absolute', bottom: 0 }}><Text style={{ textAlign: 'center', color: '#fff', fontFamily: 'Lexend_400Regular', fontSize: 16 }}>Submit</Text></TouchableOpacity>
+                        <TouchableOpacity onPress={onSubmit} style={{ backgroundColor: '#008AFF', padding: 20, borderRadius: 6, marginBottom: 80 }}><Text style={{ textAlign: 'center', color: '#fff', fontFamily: 'Lexend_400Regular', fontSize: 16 }}>Submit</Text></TouchableOpacity>
                     </View>
                 </View>
                 <Toast />
