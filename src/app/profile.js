@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image, ActivityIndicator, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
@@ -12,6 +12,7 @@ const ProfileScreen = ({ navigation }) => {
     const { user, logout } = useAuth();
     const { fontsLoaded } = useFontContext();
 
+
     if (!fontsLoaded) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -22,7 +23,7 @@ const ProfileScreen = ({ navigation }) => {
 
     const onPressMyProfile = () => {
         const userId = user?.id
-        navigation.navigate('MyProfileDetail', { userId: userId });
+        navigation.navigate('MyProfileDetail');
     }
 
     const onPressSupport = () => {

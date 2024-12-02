@@ -1,54 +1,86 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, FlatList, Modal, TextInput, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, FlatList, Modal, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/header';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useFontContext } from '../context/FontContext';
+import { patientList } from '../config/api';
+import { debounce } from 'lodash';
 
 const PatientsScreen = ({ navigation }) => {
-
-    const { user } = useAuth();
+    const { user, token } = useAuth();
     const { fontsLoaded } = useFontContext();
-
-    if (!fontsLoaded) {
-        return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color="#007AFF" />
-            </View>
-        );;
-    }
-
+    const [patients, setPatients] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [limit, setLimit] = useState(10);
     const [searchQuery, setSearchQuery] = useState('');
     const [isFilterVisible, setFilterVisible] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState('');
+    const [refreshing, setRefreshing] = useState(false);
 
-    const patients = [
-        { id: '1', name: 'John Doe', status: 'Admitted', date: '2024-11-25', email: 'john@mail.com', phone_number: '1234567890' },
-        { id: '2', name: 'Jane Smith', status: 'Discharged', date: '2024-11-20', email: 'jane@mail.com', phone_number: '1234567890' },
-        { id: '3', name: 'Michael Brown', status: 'Under Observation', date: '2024-11-22', email: 'michael@mail.com', phone_number: '1234567890' },
-        { id: '4', name: 'Michael Brown', status: 'Under Observation', date: '2024-11-22', email: 'michael@mail.com', phone_number: '1234567890' },
-        { id: '5', name: 'Michael Brown', status: 'Under Observation', date: '2024-11-22', email: 'michael@mail.com', phone_number: '1234567890' },
-        { id: '6', name: 'Michael Brown', status: 'Under Observation', date: '2024-11-22', email: 'michael@mail.com', phone_number: '1234567890' },
-        { id: '7', name: 'Michael Brown', status: 'Under Observation', date: '2024-11-22', email: 'michael@mail.com', phone_number: '1234567890' },
-        { id: '8', name: 'Michael Brown', status: 'Under Observation', date: '2024-11-22', email: 'michael@mail.com', phone_number: '1234567890' },
-        { id: '9', name: 'Michael Brown', status: 'Under Observation', date: '2024-11-22', email: 'michael@mail.com', phone_number: '1234567890' },
-        { id: '10', name: 'Michael Brown', status: 'Under Observation', date: '2024-11-22', email: 'michael@mail.com', phone_number: '1234567890' },
-    ];
+    const fetchPatientList = useCallback(async (resetPage = false) => {
+        try {
+            setLoading(true);
+            const currentPage = resetPage ? 1 : page;
+            const response = await patientList(token, currentPage, limit);
+            const { data, pagination } = response.data;
 
-    const statuses = ['All', 'Admitted', 'Discharged', 'Under Observation'];
+            setPatients(prevPatients =>
+                resetPage ? data : [...prevPatients, ...data]
+            );
+            setPage(currentPage);
+            setTotalPages(pagination.totalPages);
+        } catch (error) {
+            console.error('Failed to fetch patients:', error);
+            Alert.alert('Error', 'Unable to load patients. Please try again later.');
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    }, [token, page, limit]);
 
-    const handleSearch = (query) => {
-        setSearchQuery(query);
+    useEffect(() => {
+        fetchPatientList();
+    }, [token, page]);
+
+    // Memoized Filtered Patients
+    const filteredPatients = useMemo(() => {
+        return patients.filter((patient) => {
+            const fullName = `${patient.first_name} ${patient.middle_name || ''} ${patient.last_name}`.toLowerCase();
+            const matchesSearch = fullName.includes(searchQuery.toLowerCase());
+            const matchesStatus =
+                selectedStatus === 'All' ||
+                selectedStatus === '' ||
+                patient.status === selectedStatus;
+            return matchesSearch && matchesStatus;
+        });
+    }, [patients, searchQuery, selectedStatus]);
+
+    // Pagination Handler
+    const handleEndReached = () => {
+        if (page < totalPages && !loading) {
+            setPage(prevPage => prevPage + 1);
+        }
     };
 
-    const filteredPatients = patients.filter((patient) => {
-        const matchesSearch =
-            patient.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus =
-            selectedStatus === 'All' || selectedStatus === '' || patient.status === selectedStatus;
-        return matchesSearch && matchesStatus;
-    });
+    // Debounced Search Handler
+    const debouncedSearch = useCallback(
+        debounce((query) => {
+            setSearchQuery(query);
+        }, 300),
+        []
+    );
+
+    // Refresh Control
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        fetchPatientList(true);
+    }, []);
+
+    const statuses = ['All', 'Admitted', 'Discharged', 'Under Observation'];
 
     const handleFilterApply = (status) => {
         setSelectedStatus(status);
@@ -56,97 +88,122 @@ const PatientsScreen = ({ navigation }) => {
     };
 
     const handleAddPatient = () => {
-        navigation.navigate('AddPatient')
+        navigation.navigate('AddPatient');
     };
 
     return (
-        <>
-            <SafeAreaView style={{ backgroundColor: '#fff', flex: 1 }}>
-                <Header user={user} />
+        <SafeAreaView style={{ backgroundColor: '#fff', flex: 1 }}>
+            <Header user={user} />
 
-                <Text style={{ textAlign: 'center', fontSize: 28, fontFamily: 'Lexend_500Medium', marginBottom: 10 }}>Patient List</Text>
-
-                {/* Search & Filter */}
-                <View style={styles.searchContainer}>
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="Search patients"
-                        value={searchQuery}
-                        onChangeText={handleSearch}
-                    />
-                    <TouchableOpacity onPress={() => setFilterVisible(true)} style={styles.filterButton}>
-                        <Ionicons name="filter" size={24} color="#fff" />
-                    </TouchableOpacity>
-                </View>
-
-                <FlatList
-                    data={filteredPatients}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={{ padding: 16 }}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity>
-                            <View style={styles.patientCard}>
-                                <View>
-                                    <Text style={styles.patientName}>{item.name}</Text>
-                                    <Text style={styles.patientData}>{item.email}</Text>
-                                    <Text style={styles.patientData}>{item.phone_number}</Text>
-                                </View>
-                                <View>
-                                    <Text style={styles.patientStatus}>{item.status}</Text>
-                                    <Text style={styles.patientDate}>{item.date}</Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-                    )}
+            <Text style={styles.screenTitle}>Patient List</Text>
+            <View style={styles.searchContainer}>
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search patients"
+                    onChangeText={(text) => debouncedSearch(text)}
+                    accessibilityLabel="Search patients"
                 />
-
-                <View style={styles.addPatientContainer}>
-                    <TouchableOpacity
-                        style={styles.addPatientButton}
-                        onPress={handleAddPatient}
-                    >
-                        <Ionicons name="add-outline" size={38} color="#fff" />
-                    </TouchableOpacity>
-                </View>
-
-                <Modal
-                    visible={isFilterVisible}
-                    transparent={true}
-                    animationType="slide"
+                {/* <TouchableOpacity
+                    onPress={() => setFilterVisible(true)}
+                    style={styles.filterButton}
+                    accessibilityLabel="Filter patients"
                 >
-                    <View style={styles.modalOverlay}>
-                        <View style={styles.filterModal}>
-                            <Text style={styles.modalTitle}>Filter by Status</Text>
-                            {statuses.map((status, index) => (
-                                <TouchableOpacity
-                                    key={index}
-                                    onPress={() => handleFilterApply(status)}
+                    <Ionicons name="filter" size={24} color="#fff" />
+                </TouchableOpacity> */}
+            </View>
+
+            <FlatList
+                data={filteredPatients}
+                keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
+                contentContainerStyle={{ padding: 16 }}
+                renderItem={({ item }) => (
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('PatientDetails', { id: item.id })}
+                        accessibilityRole="button"
+                        accessibilityLabel={`View details for ${item.first_name} ${item.last_name}`}
+                    >
+                        <View style={styles.patientCard}>
+                            <View>
+                                <Text style={styles.patientName}>
+                                    {`${item.first_name} ${item.middle_name || ''} ${item.last_name}`}
+                                </Text>
+                                <Text style={styles.patientData}>{item.email}</Text>
+                                <Text style={styles.patientData}>{item.phone_number}</Text>
+                                <Text style={[styles.patientDate, { fontFamily: 'Lexend_200ExtraLight' }]}>
+                                    {new Date(item.created_at).toDateString()}
+                                </Text>
+                            </View>
+                            <View>
+                                <Text style={styles.patientStatus}>{item.status}</Text>
+                                <Feather name='chevron-right' size={28} />
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                )}
+                ListEmptyComponent={
+                    <Text style={styles.emptyListText}>
+                        No patients found
+                    </Text>
+                }
+                ListFooterComponent={loading ? <ActivityIndicator size="large" color="#007AFF" /> : null}
+                initialNumToRender={10}
+                maxToRenderPerBatch={10}
+                windowSize={21}
+                removeClippedSubviews={true}
+                onEndReached={handleEndReached}
+                onEndReachedThreshold={0.5}
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+            />
+
+            <View style={styles.addPatientContainer}>
+                <TouchableOpacity
+                    style={styles.addPatientButton}
+                    onPress={handleAddPatient}
+                    accessibilityLabel="Add new patient"
+                >
+                    <Ionicons name="add-outline" size={38} color="#fff" />
+                </TouchableOpacity>
+            </View>
+
+            <Modal
+                visible={isFilterVisible}
+                transparent={true}
+                animationType="slide"
+                accessibilityLabel="Filter patients modal"
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.filterModal}>
+                        <Text style={styles.modalTitle}>Filter by Status</Text>
+                        {statuses.map((status, index) => (
+                            <TouchableOpacity
+                                key={index}
+                                onPress={() => handleFilterApply(status)}
+                                style={[
+                                    styles.filterOption,
+                                    selectedStatus === status && styles.selectedFilterOption,
+                                ]}
+                            >
+                                <Text
                                     style={[
-                                        styles.filterOption,
-                                        selectedStatus === status && styles.selectedFilterOption,
+                                        styles.filterOptionText,
+                                        selectedStatus === status && styles.selectedFilterText,
                                     ]}
                                 >
-                                    <Text
-                                        style={[
-                                            styles.filterOptionText,
-                                            selectedStatus === status && styles.selectedFilterText,
-                                        ]}
-                                    >
-                                        {status}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                            <TouchableOpacity
-                                style={styles.closeModalButton}
-                                onPress={() => setFilterVisible(false)}
-                            >
-                                <Ionicons name="close-circle" size={28} color="#d9534f" />
+                                    {status}
+                                </Text>
                             </TouchableOpacity>
-                        </View>
+                        ))}
+                        <TouchableOpacity
+                            style={styles.closeModalButton}
+                            onPress={() => setFilterVisible(false)}
+                        >
+                            <Ionicons name="close-circle" size={28} color="#d9534f" />
+                        </TouchableOpacity>
                     </View>
-                </Modal>
-            </SafeAreaView>
-        </>
+                </View>
+            </Modal>
+        </SafeAreaView>
     );
 }
 
@@ -212,7 +269,6 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#888',
         fontFamily: 'Lexend_300Light',
-        textAlign: 'right'
     },
     modalOverlay: {
         flex: 1,
@@ -268,6 +324,20 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginLeft: 8,
     },
+    emptyListText: {
+        textAlign: 'center',
+        marginTop: 50,
+        fontSize: 18,
+        color: '#888',
+        fontFamily: 'Lexend_500Medium'
+    },
+    screenTitle: {
+        textAlign: 'center',
+        fontSize: 28,
+        fontFamily: 'Lexend_500Medium',
+        marginBottom: 10
+    }
+
 });
 
 export default PatientsScreen;

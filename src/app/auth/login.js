@@ -44,15 +44,26 @@ const LoginScreen = () => {
                 setError('Invalid credentials. Please try again.');
             }
         } catch (err) {
-            setError('An error occurred. Please try again.');
+            console.log("11", err.status);
+
+            if (err.status == 400) {
+                setError('Password should be of more then 6 characters')
+            } else if (err.status == 401) {
+                setError('Password Not Correct/Unauthorized User')
+            } else if (err.status == 404) {
+                setError('No User Found')
+            } else {
+                setError('An error occurred. Please try again.');
+            }
+
         } finally {
             setLoading(false);
         }
     };
 
     const onPressRegisterAccount = () => {
-        // router.push('auth/registeraccount');
-        router.push('screens/support');
+        router.push('auth/registeraccount');
+        // router.push('screens/support');
     }
     const onPressForgotPassword = () => {
         router.push('auth/forgotpassword');

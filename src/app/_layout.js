@@ -17,13 +17,14 @@ import SupportScreen from './screens/support';
 import AboutMedscredScreen from './screens/aboutmedscred';
 import TermsConditionsScreen from './screens/termscondition';
 import NotificationScreen from './screens/notification';
-import MyProfileDetailScreen from './screens/profiledetails/[id]';
+import MyProfileDetailScreen from './screens/profiledetails';
 import AddPatientScreen from './screens/addpatient';
+import PatientDetailScreen from './screens/patientdetails';
 
 import DashboardScreen from "."
 import ProfileScreen from "./profile"
 import PatientsScreen from "./patients"
-import LoansScreen from "./loans"
+import LoansScreen from "./discharge"
 
 
 const Tab = createBottomTabNavigator();
@@ -72,6 +73,12 @@ const DashboardStack = () => {
                 component={SupportScreen}
                 options={{ headerShown: false }}
             />
+            <Stack.Screen
+                name="PatientDetails"
+                component={PatientDetailScreen}
+                options={{ headerShown: false }}
+            />
+
         </Stack.Navigator>
     )
 };
@@ -105,6 +112,11 @@ const PatientStack = () => {
             <Stack.Screen
                 name="AddPatient"
                 component={AddPatientScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="PatientDetails"
+                component={PatientDetailScreen}
                 options={{ headerShown: false }}
             />
         </Stack.Navigator>
@@ -219,8 +231,8 @@ function AppNavigator() {
                         iconName = focused ? 'home' : 'home-outline';
                     } else if (route.name === 'Patients') {
                         iconName = focused ? 'people' : 'people-outline';
-                    } else if (route.name === 'Loans') {
-                        iconName = focused ? 'cash' : 'cash-outline';
+                    } else if (route.name === 'Discharge') {
+                        iconName = focused ? 'document-text' : 'document-text-outline';
                     } else if (route.name === 'Profile') {
                         iconName = focused ? 'person' : 'person-outline';
                     }
@@ -259,7 +271,7 @@ function AppNavigator() {
         >
             <Tab.Screen name="Dashboard" component={DashboardStack} />
             <Tab.Screen name="Patients" component={PatientStack} />
-            <Tab.Screen name="Loans" component={LoansScreen} />
+            <Tab.Screen name="Discharge" component={LoansScreen} />
             <Tab.Screen name="Profile" component={ProfileStack} />
         </Tab.Navigator>
     );
