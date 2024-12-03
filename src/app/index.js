@@ -50,8 +50,8 @@ const DashboardScreen = ({ navigation }) => {
         <>
             <SafeAreaView style={{ backgroundColor: '#fff', flex: 1 }}>
                 <FlatList
-                    data={patients}
-                    keyExtractor={(item, index) => (item.patient_id ? item.patient_id.toString() : index.toString())}
+                    data={patients.slice(0, 5)}
+                    keyExtractor={(item, index) => `${item.patient_id || index}`}
                     contentContainerStyle={{ paddingBottom: 16, marginBottom: 80 }}
                     ListHeaderComponent={
                         <>
@@ -133,12 +133,12 @@ const DashboardScreen = ({ navigation }) => {
                             </View>
                         </TouchableOpacity>
                     )}
-                    initialNumToRender={1}
                     ListEmptyComponent={
                         <Text style={styles.emptyListText}>
                             No patients found
                         </Text>
                     }
+                    initialNumToRender={10}
                 />
             </SafeAreaView>
         </>

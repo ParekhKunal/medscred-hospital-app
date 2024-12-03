@@ -38,8 +38,6 @@ const patientList = async (token, page, limit) => {
 const supportForm = async (payload, config) => {
     try {
 
-        console.log(payload);
-
         const response = await axios.post(`${BASE_URL}/v1/general/ticket-raise`, payload, config)
 
         return response
@@ -49,4 +47,33 @@ const supportForm = async (payload, config) => {
     }
 }
 
-export { profileInfoApi, patientList, supportForm }
+const hospitalAccountType = async (token) => {
+    try {
+        const response = await axios.get(`${BASE_URL}/v1/hospitals/account-types`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+
+        return response.data.data
+    } catch (error) {
+        return error
+    }
+}
+
+const caseList = async (token) => {
+    try {
+        const response = await axios.get(`${BASE_URL}/v1/hospital-mobile/case-list`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+        })
+
+        return response.data;
+
+    } catch (error) {
+        return error
+    }
+}
+
+export { profileInfoApi, patientList, supportForm, hospitalAccountType, caseList }

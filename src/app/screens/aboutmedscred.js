@@ -18,7 +18,6 @@ const AboutMedscredScreen = ({ navigation }) => {
     if (!token) {
         return (
             <SafeAreaView >
-
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
                     <ActivityIndicator size="large" color="#007AFF" />
                 </View>

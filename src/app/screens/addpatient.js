@@ -1,4 +1,4 @@
-import React, { useState, useRef, forwardRef } from 'react';
+import React, { useState, useRef, forwardRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, ScrollView, TextInput, Vibration, Image, Modal, Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
@@ -8,11 +8,15 @@ import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Feather } from '@expo/vector-icons';
+import { useAuth } from '../../context/AuthContext'
+import { hospitalAccountType } from '../../config/api';
 
 const AddPatientScreen = ({ navigation }) => {
+    const { user, token } = useAuth();
     const [currentStep, setCurrentStep] = useState(1);
     const [animation] = useState(new Animated.Value(0));
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [hospitalType, setHospitalType] = useState([])
 
     const [formData, setFormData] = useState({
         firstName: '',
@@ -35,6 +39,7 @@ const AddPatientScreen = ({ navigation }) => {
         date_of_admission: '',
         admission_time: '',
         cash_type: '',
+        loan_type: '',
         passportPhoto: null,
         aadhaarFront: null,
         aadhaarBack: null,
@@ -47,6 +52,29 @@ const AddPatientScreen = ({ navigation }) => {
         showModal: false,  // State for showing the modal
         selectedField: '',
     });
+
+    useEffect(() => {
+
+        const hospitalType = async () => {
+            try {
+
+                const data = await hospitalAccountType(token);
+
+                const processedTypes = data[0]?.account_type.split(',').map((type, index) => ({
+                    label: type.trim(),
+                    value: index + 1, // Start values from 1
+                }));
+
+                setHospitalType(processedTypes || []);
+
+            } catch (error) {
+                console.error(error)
+            }
+        }
+
+        hospitalType()
+
+    }, [token]);
 
     const toggleModal = (field) => {
         setFormData((prevFormData) => ({
@@ -214,92 +242,96 @@ const AddPatientScreen = ({ navigation }) => {
             }
         }
         if (currentStep === 2) {
-            const fieldNames = {
-                treating_doctor_name: 'Doctor Name',
-                treatment_name: 'Treatment Name',
-                treatment_type: 'Treatment Type',
-                attendant_name: 'Attendant Name',
-                relationship_with_insured: 'Relationship With Insured',
-                estimated_amount: 'Estimated Amount',
-                estimated_stay: 'Estimated Stay',
-                is_patient_admitted: 'Is Patient Admitted',
-                date_of_admission: 'Date Of Admission',
-            };
+            if (formData.loan_type == 1) {
+                const fieldNames = {
+                    treating_doctor_name: 'Doctor Name',
+                    treatment_name: 'Treatment Name',
+                    treatment_type: 'Treatment Type',
+                    attendant_name: 'Attendant Name',
+                    relationship_with_insured: 'Relationship With Insured',
+                    estimated_amount: 'Estimated Amount',
+                    estimated_stay: 'Estimated Stay',
+                    is_patient_admitted: 'Is Patient Admitted',
+                    date_of_admission: 'Date Of Admission',
+                };
 
-            const requiredFields = ['doctor_id', 'treatment_name', 'treatment_type', 'attendant_name', 'relationship_with_insured', 'estimated_amount', 'estimated_stay', 'is_patient_admitted', 'date_of_admission'];
-            const missingFields = [];
+                const requiredFields = ['doctor_id', 'treatment_name', 'treatment_type', 'attendant_name', 'relationship_with_insured', 'estimated_amount', 'estimated_stay', 'is_patient_admitted', 'date_of_admission'];
+                const missingFields = [];
 
-            requiredFields.forEach(field => {
-                if (!formData[field]) {
-                    missingFields.push(fieldNames[field]);
-                }
-            });
-
-            if (missingFields.length > 0) {
-
-                Vibration.vibrate(400);
-
-                const message = `Please fill the following fields in Step 1: ${missingFields.join(', ')}`;
-                Toast.show({
-                    type: 'error',
-                    position: 'top',
-                    text1: 'Form Incomplete',
-                    text2: message,
-                    visibilityTime: 5000,
-                    autoHide: true,
-                    draggable: true,
-                    topOffset: 100,
-                    bottomOffset: 40,
+                requiredFields.forEach(field => {
+                    if (!formData[field]) {
+                        missingFields.push(fieldNames[field]);
+                    }
                 });
-                return false;
+
+                if (missingFields.length > 0) {
+
+                    Vibration.vibrate(400);
+
+                    const message = `Please fill the following fields in Step 1: ${missingFields.join(', ')}`;
+                    Toast.show({
+                        type: 'error',
+                        position: 'top',
+                        text1: 'Form Incomplete',
+                        text2: message,
+                        visibilityTime: 5000,
+                        autoHide: true,
+                        draggable: true,
+                        topOffset: 100,
+                        bottomOffset: 40,
+                    });
+                    return false;
+                }
             }
         }
         if (currentStep === 3) {
-            const fieldNames = {
-                passportPhoto: 'Patient Passort Photo',
-                aadhaarFront: 'Aadhaar Card Front',
-                aadhaarBack: 'Aadhaar Card Back',
-                aadhaarBack: 'PAN Card',
-                insuranceCard: 'Insurance Card',
-                insuredAadhaarFront: 'Insured Aadhaar Card Front',
-                insuredAadhaarBack: 'Insured Aadhaar Card Back',
-                insuredPanCard: 'Insured Pan Card',
-                insuredInsuranceCard: 'Insured Insurance Card',
-            };
+            if (formData.loan_type == 1) {
+                const fieldNames = {
+                    passportPhoto: 'Patient Passort Photo',
+                    aadhaarFront: 'Aadhaar Card Front',
+                    aadhaarBack: 'Aadhaar Card Back',
+                    aadhaarBack: 'PAN Card',
+                    insuranceCard: 'Insurance Card',
+                    insuredAadhaarFront: 'Insured Aadhaar Card Front',
+                    insuredAadhaarBack: 'Insured Aadhaar Card Back',
+                    insuredPanCard: 'Insured Pan Card',
+                    insuredInsuranceCard: 'Insured Insurance Card',
+                };
 
-            let requiredFields
+                let requiredFields
 
-            if (formData.relationship_with_insured != 'SELF') {
+                if (formData.relationship_with_insured != 'SELF') {
 
-                requiredFields = ['passportPhoto', 'aadhaarFront', 'aadhaarBack', 'aadhaarBack', 'insuranceCard', 'insuredAadhaarFront', 'insuredAadhaarBack', 'insuredPanCard', 'insuredInsuranceCard'];
-            } else {
-                requiredFields = ['passportPhoto', 'aadhaarFront', 'aadhaarBack', 'aadhaarBack', 'insuranceCard'];
-            }
-            const missingFields = [];
-
-            requiredFields.forEach(field => {
-                if (!formData[field]) {
-                    missingFields.push(fieldNames[field]);
+                    requiredFields = ['passportPhoto', 'aadhaarFront', 'aadhaarBack', 'aadhaarBack', 'insuranceCard', 'insuredAadhaarFront', 'insuredAadhaarBack', 'insuredPanCard', 'insuredInsuranceCard'];
+                } else {
+                    requiredFields = ['passportPhoto', 'aadhaarFront', 'aadhaarBack', 'aadhaarBack', 'insuranceCard'];
                 }
-            });
+                const missingFields = [];
 
-            if (missingFields.length > 0) {
-
-                Vibration.vibrate(400);
-
-                const message = `Please fill the following fields in Step 1: ${missingFields.join(', ')}`;
-                Toast.show({
-                    type: 'error',
-                    position: 'top',
-                    text1: 'Form Incomplete',
-                    text2: message,
-                    visibilityTime: 5000,
-                    autoHide: true,
-                    draggable: true,
-                    topOffset: 100,
-                    bottomOffset: 40,
+                requiredFields.forEach(field => {
+                    if (!formData[field]) {
+                        missingFields.push(fieldNames[field]);
+                    }
                 });
-                return false;
+
+                if (missingFields.length > 0) {
+
+                    Vibration.vibrate(400);
+
+                    const message = `Please fill the following fields in Step 1: ${missingFields.join(', ')}`;
+                    Toast.show({
+                        type: 'error',
+                        position: 'top',
+                        text1: 'Form Incomplete',
+                        text2: message,
+                        visibilityTime: 5000,
+                        autoHide: true,
+                        draggable: true,
+                        topOffset: 100,
+                        bottomOffset: 40,
+                    });
+                    return false;
+                }
             }
         }
         return true;
@@ -508,235 +540,305 @@ const AddPatientScreen = ({ navigation }) => {
                 return (
                     <>
                         <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>
-                                Treating Doctor Name<Text style={{ color: 'red' }}>*</Text>
-                            </Text>
-                            <TextInput
-                                placeholder="Treating Doctor Name"
-                                value={formData.doctor_id}
-                                onChangeText={(text) =>
-                                    handleInputChange('doctor_id', text)
-                                }
-                                style={styles.input}
-                            />
-                        </View>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>Treatment Name<Text style={{ color: 'red' }}>*</Text></Text>
-                            <TextInput
-                                placeholder="Treatment Name"
-                                value={formData.treatment_name}
-                                onChangeText={(text) =>
-                                    handleInputChange('treatment_name', text)
-                                }
-                                style={styles.input}
-                            />
-                        </View>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>Treatment Type<Text style={{ color: 'red' }}>*</Text></Text>
-                            <View style={{ borderWidth: 1, height: 50, borderColor: '#D4D4D4', borderRadius: 6, justifyContent: 'center' }}>
-                                <Picker
-                                    selectedValue={formData.treatment_type}
-                                    onValueChange={(itemValue) =>
-                                        handleInputChange('treatment_type', itemValue)
-                                    }
-                                    style={styles.picker}
-                                >
-                                    <Picker.Item label="Medical Management" value="Medical Management" />
-                                    <Picker.Item label="Surgical Management" value="Surgical Management" />
-                                </Picker>
-                            </View>
-                        </View>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>Attendant/Policy Holder Name<Text style={{ color: 'red' }}>*</Text></Text>
-                            <TextInput
-                                placeholder="Attendant/Policy Holder Name"
-                                value={formData.attendant_name}
-                                onChangeText={(text) =>
-                                    handleInputChange('attendant_name', text)
-                                }
-                                style={styles.input}
-                            />
-                        </View>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>Relationship With Insured<Text style={{ color: 'red' }}>*</Text></Text>
-                            <View style={{ borderWidth: 1, height: 50, borderColor: '#D4D4D4', borderRadius: 6, justifyContent: 'center' }}>
-                                <Picker
-                                    selectedValue={formData.relationship_with_insured}
-                                    onValueChange={(itemValue) =>
-                                        handleInputChange('relationship_with_insured', itemValue)
-                                    }
-                                    style={styles.picker}
-                                >
-                                    <Picker.Item label="SELF" value="SELF" />
-                                    <Picker.Item label="DEPENDENT CHILD" value="DEPENDENT CHILD" />
-                                    <Picker.Item label="SPOUSE" value="SPOUSE" />
-                                    <Picker.Item label="MOTHER" value="MOTHER" />
-                                    <Picker.Item label="FATHER" value="FATHER" />
-                                    <Picker.Item label="OTHER" value="OTHER" />
-                                </Picker>
-                            </View>
-                        </View>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>Estimated Amount<Text style={{ color: 'red' }}>*</Text></Text>
-                            <TextInput
-                                placeholder="Estimated Amount"
-                                value={formData.estimated_amount}
-                                onChangeText={(text) =>
-                                    handleInputChange('estimated_amount', text)
-                                }
-                                keyboardType='numeric'
-                                style={styles.input}
-                            />
-                        </View>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>Estimated Stay<Text style={{ color: 'red' }}>*</Text></Text>
-                            <TextInput
-                                placeholder="Estimated Stay"
-                                value={formData.estimated_stay}
-                                onChangeText={(text) =>
-                                    handleInputChange('estimated_stay', text)
-                                }
-                                keyboardType='numeric'
-                                style={styles.input}
-                            />
-                        </View>
-                        <View style={styles.inputContainer}>
                             <Text style={styles.inputLabel}>Is Patient Admitted?<Text style={{ color: 'red' }}>*</Text></Text>
                             <View style={{ borderWidth: 1, height: 50, borderColor: '#D4D4D4', borderRadius: 6, justifyContent: 'center' }}>
                                 <Picker
-                                    selectedValue={formData.is_patient_admitted}
+                                    selectedValue={formData.loan_type}
                                     onValueChange={(itemValue) =>
-                                        handleInputChange('is_patient_admitted', itemValue)
+                                        handleInputChange('loan_type', itemValue)
                                     }
                                     style={styles.picker}
                                 >
-                                    <Picker.Item label="PLANNED ADMISSION" value="PLANNED ADMISSION" />
-                                    <Picker.Item label="PATIENT ADMITTED" value="PATIENT ADMITTED" />
+
+                                    {
+                                        hospitalType.map((type) => (
+                                            <Picker.Item key={type.value} label={type.label} value={type.value} />
+                                        ))
+                                    }
                                 </Picker>
                             </View>
                         </View>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>
-                                Date of Admission<Text style={{ color: 'red' }}>*</Text>
-                            </Text>
-                            <TouchableOpacity
-                                onPress={() => setShowDatePicker(true)}
-                                style={styles.input}
-                            >
-                                <Text style={styles.inputText}>
-                                    {formData.date_of_admission ? formData.date_of_admission.toISOString().split('T')[0] : 'Select Date'}
-                                </Text>
-                            </TouchableOpacity>
-                            {showDatePicker && (
-                                <DateTimePicker
-                                    value={formData.date_of_admission || new Date()}
-                                    mode="date"
-                                    display="default"
-                                    onChange={(event, selectedDate) => {
-                                        if (selectedDate) {
-                                            handleInputChange(
-                                                'date_of_admission',
-                                                selectedDate
-                                            );
-                                        }
-                                        setShowDatePicker(false);
-                                    }}
-                                />
-                            )}
-                        </View>
-                    </>
-                );
-            case 3:
-                return (
-                    <>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>
-                                Upload Passport Photo<Text style={{ color: 'red' }}>*</Text>
-                            </Text>
-                            <TouchableOpacity onPress={() => toggleModal('passportPhoto')} style={styles.uploadButton}>
-                                <Text style={styles.uploadButtonText}>Upload Passport Photo or Take Photo</Text>
-                            </TouchableOpacity>
-                            {renderFilePreview('passportPhoto')}
-                        </View>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>
-                                Aadhaar Card Front<Text style={{ color: 'red' }}>*</Text>
-                            </Text>
-                            <TouchableOpacity onPress={() => toggleModal('aadhaarFront')} style={styles.uploadButton}>
-                                <Text style={styles.uploadButtonText}>Upload Aadhaar Front</Text>
-                            </TouchableOpacity>
-                            {renderFilePreview('aadhaarFront')}
-                        </View>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>
-                                PAN Card<Text style={{ color: 'red' }}>*</Text>
-                            </Text>
-                            <TouchableOpacity onPress={() => toggleModal('panCard')} style={styles.uploadButton}>
-                                <Text style={styles.uploadButtonText}>Upload PAN</Text>
-                            </TouchableOpacity>
-                            {renderFilePreview('panCard')}
-                        </View>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>
-                                Patient/Insured Insurance Card<Text style={{ color: 'red' }}>*</Text>
-                            </Text>
-                            <TouchableOpacity onPress={() => toggleModal('insuranceCard')} style={styles.uploadButton}>
-                                <Text style={styles.uploadButtonText}>Upload Aadhaar Front</Text>
-                            </TouchableOpacity>
-                            {renderFilePreview('insuranceCard')}
-                        </View>
-
                         {
-                            formData.relationship_with_insured != 'SELF' &&
+                            formData.loan_type == 1 &&
                             (
                                 <>
                                     <View style={styles.inputContainer}>
                                         <Text style={styles.inputLabel}>
-                                            Insured Aadhaar Card Front<Text style={{ color: 'red' }}>*</Text>
+                                            Treating Doctor Name<Text style={{ color: 'red' }}>*</Text>
                                         </Text>
-                                        <TouchableOpacity onPress={() => toggleModal('insuredAadhaarFront')} style={styles.uploadButton}>
-                                            <Text style={styles.uploadButtonText}>Upload Insured Aadhaar Front</Text>
-                                        </TouchableOpacity>
-                                        {renderFilePreview('insuredAadhaarFront')}
+                                        <TextInput
+                                            placeholder="Treating Doctor Name"
+                                            value={formData.doctor_id}
+                                            onChangeText={(text) =>
+                                                handleInputChange('doctor_id', text)
+                                            }
+                                            style={styles.input}
+                                        />
+                                    </View>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>Treatment Name<Text style={{ color: 'red' }}>*</Text></Text>
+                                        <TextInput
+                                            placeholder="Treatment Name"
+                                            value={formData.treatment_name}
+                                            onChangeText={(text) =>
+                                                handleInputChange('treatment_name', text)
+                                            }
+                                            style={styles.input}
+                                        />
+                                    </View>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>Treatment Type<Text style={{ color: 'red' }}>*</Text></Text>
+                                        <View style={{ borderWidth: 1, height: 50, borderColor: '#D4D4D4', borderRadius: 6, justifyContent: 'center' }}>
+                                            <Picker
+                                                selectedValue={formData.treatment_type}
+                                                onValueChange={(itemValue) =>
+                                                    handleInputChange('treatment_type', itemValue)
+                                                }
+                                                style={styles.picker}
+                                            >
+                                                <Picker.Item label="Medical Management" value="Medical Management" />
+                                                <Picker.Item label="Surgical Management" value="Surgical Management" />
+                                            </Picker>
+                                        </View>
+                                    </View>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>Attendant/Policy Holder Name<Text style={{ color: 'red' }}>*</Text></Text>
+                                        <TextInput
+                                            placeholder="Attendant/Policy Holder Name"
+                                            value={formData.attendant_name}
+                                            onChangeText={(text) =>
+                                                handleInputChange('attendant_name', text)
+                                            }
+                                            style={styles.input}
+                                        />
+                                    </View>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>Relationship With Insured<Text style={{ color: 'red' }}>*</Text></Text>
+                                        <View style={{ borderWidth: 1, height: 50, borderColor: '#D4D4D4', borderRadius: 6, justifyContent: 'center' }}>
+                                            <Picker
+                                                selectedValue={formData.relationship_with_insured}
+                                                onValueChange={(itemValue) =>
+                                                    handleInputChange('relationship_with_insured', itemValue)
+                                                }
+                                                style={styles.picker}
+                                            >
+                                                <Picker.Item label="SELF" value="SELF" />
+                                                <Picker.Item label="DEPENDENT CHILD" value="DEPENDENT CHILD" />
+                                                <Picker.Item label="SPOUSE" value="SPOUSE" />
+                                                <Picker.Item label="MOTHER" value="MOTHER" />
+                                                <Picker.Item label="FATHER" value="FATHER" />
+                                                <Picker.Item label="OTHER" value="OTHER" />
+                                            </Picker>
+                                        </View>
+                                    </View>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>Estimated Amount<Text style={{ color: 'red' }}>*</Text></Text>
+                                        <TextInput
+                                            placeholder="Estimated Amount"
+                                            value={formData.estimated_amount}
+                                            onChangeText={(text) =>
+                                                handleInputChange('estimated_amount', text)
+                                            }
+                                            keyboardType='numeric'
+                                            style={styles.input}
+                                        />
+                                    </View>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>Estimated Stay<Text style={{ color: 'red' }}>*</Text></Text>
+                                        <TextInput
+                                            placeholder="Estimated Stay"
+                                            value={formData.estimated_stay}
+                                            onChangeText={(text) =>
+                                                handleInputChange('estimated_stay', text)
+                                            }
+                                            keyboardType='numeric'
+                                            style={styles.input}
+                                        />
+                                    </View>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>Is Patient Admitted?<Text style={{ color: 'red' }}>*</Text></Text>
+                                        <View style={{ borderWidth: 1, height: 50, borderColor: '#D4D4D4', borderRadius: 6, justifyContent: 'center' }}>
+                                            <Picker
+                                                selectedValue={formData.is_patient_admitted}
+                                                onValueChange={(itemValue) =>
+                                                    handleInputChange('is_patient_admitted', itemValue)
+                                                }
+                                                style={styles.picker}
+                                            >
+                                                <Picker.Item label="PLANNED ADMISSION" value="PLANNED ADMISSION" />
+                                                <Picker.Item label="PATIENT ADMITTED" value="PATIENT ADMITTED" />
+                                            </Picker>
+                                        </View>
                                     </View>
                                     <View style={styles.inputContainer}>
                                         <Text style={styles.inputLabel}>
-                                            Insured Aadhaar Card Front<Text style={{ color: 'red' }}>*</Text>
+                                            Date of Admission<Text style={{ color: 'red' }}>*</Text>
                                         </Text>
-                                        <TouchableOpacity onPress={() => toggleModal('insuredAadhaarBack')} style={styles.uploadButton}>
-                                            <Text style={styles.uploadButtonText}>Upload Insured Aadhaar Back</Text>
+                                        <TouchableOpacity
+                                            onPress={() => setShowDatePicker(true)}
+                                            style={styles.input}
+                                        >
+                                            <Text style={styles.inputText}>
+                                                {formData.date_of_admission ? formData.date_of_admission.toISOString().split('T')[0] : 'Select Date'}
+                                            </Text>
                                         </TouchableOpacity>
-                                        {renderFilePreview('insuredAadhaarBack')}
+                                        {showDatePicker && (
+                                            <DateTimePicker
+                                                value={formData.date_of_admission || new Date()}
+                                                mode="date"
+                                                display="default"
+                                                onChange={(event, selectedDate) => {
+                                                    if (selectedDate) {
+                                                        handleInputChange(
+                                                            'date_of_admission',
+                                                            selectedDate
+                                                        );
+                                                    }
+                                                    setShowDatePicker(false);
+                                                }}
+                                            />
+                                        )}
                                     </View>
-                                    <View style={styles.inputContainer}>
-                                        <Text style={styles.inputLabel}>
-                                            Insured PAN Card<Text style={{ color: 'red' }}>*</Text>
-                                        </Text>
-                                        <TouchableOpacity onPress={() => toggleModal('insuredPanCard')} style={styles.uploadButton}>
-                                            <Text style={styles.uploadButtonText}>Upload Insured PAN Card</Text>
-                                        </TouchableOpacity>
-                                        {renderFilePreview('insuredPanCard')}
+                                </>
+                            )
+                        }
+                        {
+                            formData.loan_type == 2 &&
+                            (
+                                <>
+                                    <View>
+                                        <Text>Cashless Form</Text>
                                     </View>
-                                    <View style={styles.inputContainer}>
-                                        <Text style={styles.inputLabel}>
-                                            Insured Insurance Card<Text style={{ color: 'red' }}>*</Text>
-                                        </Text>
-                                        <TouchableOpacity onPress={() => toggleModal('insuredInsuranceCard')} style={styles.uploadButton}>
-                                            <Text style={styles.uploadButtonText}>Upload Insured Insurance Card</Text>
-                                        </TouchableOpacity>
-                                        {renderFilePreview('insuredInsuranceCard')}
+                                </>
+                            )
+                        }
+                        {
+                            formData.loan_type == 3 &&
+                            (
+                                <>
+                                    <View>
+                                        <Text>Aesthetic Form</Text>
                                     </View>
                                 </>
                             )
                         }
                     </>
                 );
-            case 4:
+            case 3:
                 return (
-                    <Text style={styles.infoText}>
-                        Review and submit the details here.
-                    </Text>
+                    <>
+                        {
+                            formData.loan_type == 1 && (
+                                <>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>
+                                            Upload Passport Photo<Text style={{ color: 'red' }}>*</Text>
+                                        </Text>
+                                        <TouchableOpacity onPress={() => toggleModal('passportPhoto')} style={styles.uploadButton}>
+                                            <Text style={styles.uploadButtonText}>Upload Passport Photo or Take Photo</Text>
+                                        </TouchableOpacity>
+                                        {renderFilePreview('passportPhoto')}
+                                    </View>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>
+                                            Aadhaar Card Front<Text style={{ color: 'red' }}>*</Text>
+                                        </Text>
+                                        <TouchableOpacity onPress={() => toggleModal('aadhaarFront')} style={styles.uploadButton}>
+                                            <Text style={styles.uploadButtonText}>Upload Aadhaar Front</Text>
+                                        </TouchableOpacity>
+                                        {renderFilePreview('aadhaarFront')}
+                                    </View>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>
+                                            PAN Card<Text style={{ color: 'red' }}>*</Text>
+                                        </Text>
+                                        <TouchableOpacity onPress={() => toggleModal('panCard')} style={styles.uploadButton}>
+                                            <Text style={styles.uploadButtonText}>Upload PAN</Text>
+                                        </TouchableOpacity>
+                                        {renderFilePreview('panCard')}
+                                    </View>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>
+                                            Patient/Insured Insurance Card<Text style={{ color: 'red' }}>*</Text>
+                                        </Text>
+                                        <TouchableOpacity onPress={() => toggleModal('insuranceCard')} style={styles.uploadButton}>
+                                            <Text style={styles.uploadButtonText}>Upload Aadhaar Front</Text>
+                                        </TouchableOpacity>
+                                        {renderFilePreview('insuranceCard')}
+                                    </View>
+
+                                    {
+                                        formData.relationship_with_insured != 'SELF' &&
+                                        (
+                                            <>
+                                                <View style={styles.inputContainer}>
+                                                    <Text style={styles.inputLabel}>
+                                                        Insured Aadhaar Card Front<Text style={{ color: 'red' }}>*</Text>
+                                                    </Text>
+                                                    <TouchableOpacity onPress={() => toggleModal('insuredAadhaarFront')} style={styles.uploadButton}>
+                                                        <Text style={styles.uploadButtonText}>Upload Insured Aadhaar Front</Text>
+                                                    </TouchableOpacity>
+                                                    {renderFilePreview('insuredAadhaarFront')}
+                                                </View>
+                                                <View style={styles.inputContainer}>
+                                                    <Text style={styles.inputLabel}>
+                                                        Insured Aadhaar Card Front<Text style={{ color: 'red' }}>*</Text>
+                                                    </Text>
+                                                    <TouchableOpacity onPress={() => toggleModal('insuredAadhaarBack')} style={styles.uploadButton}>
+                                                        <Text style={styles.uploadButtonText}>Upload Insured Aadhaar Back</Text>
+                                                    </TouchableOpacity>
+                                                    {renderFilePreview('insuredAadhaarBack')}
+                                                </View>
+                                                <View style={styles.inputContainer}>
+                                                    <Text style={styles.inputLabel}>
+                                                        Insured PAN Card<Text style={{ color: 'red' }}>*</Text>
+                                                    </Text>
+                                                    <TouchableOpacity onPress={() => toggleModal('insuredPanCard')} style={styles.uploadButton}>
+                                                        <Text style={styles.uploadButtonText}>Upload Insured PAN Card</Text>
+                                                    </TouchableOpacity>
+                                                    {renderFilePreview('insuredPanCard')}
+                                                </View>
+                                                <View style={styles.inputContainer}>
+                                                    <Text style={styles.inputLabel}>
+                                                        Insured Insurance Card<Text style={{ color: 'red' }}>*</Text>
+                                                    </Text>
+                                                    <TouchableOpacity onPress={() => toggleModal('insuredInsuranceCard')} style={styles.uploadButton}>
+                                                        <Text style={styles.uploadButtonText}>Upload Insured Insurance Card</Text>
+                                                    </TouchableOpacity>
+                                                    {renderFilePreview('insuredInsuranceCard')}
+                                                </View>
+                                            </>
+                                        )
+                                    }
+                                </>
+                            )
+                        }
+                        {
+                            formData.loan_type == 2 && (
+                                <>
+                                    <View>
+                                        <Text>Cashless Document</Text>
+                                    </View>
+                                </>
+                            )
+                        }
+                        {
+                            formData.loan_type == 3 && (
+                                <>
+                                    <View>
+                                        <Text>Aesthetic Document</Text>
+                                    </View>
+                                </>
+                            )
+                        }
+                    </>
                 );
+            // case 4:
+            //     return (
+            //         <Text style={styles.infoText}>
+            //             Review and submit the details here.
+            //         </Text>
+            //     );
             default:
                 return null;
         }
@@ -772,7 +874,7 @@ const AddPatientScreen = ({ navigation }) => {
                         currentStep >= 3 && styles.activeStep,
                     ]}
                 />
-                <View
+                {/* <View
                     style={[styles.line, currentStep >= 4 && styles.activeLine]}
                 />
                 <View
@@ -780,7 +882,7 @@ const AddPatientScreen = ({ navigation }) => {
                         styles.step,
                         currentStep >= 4 && styles.activeStep,
                     ]}
-                />
+                /> */}
             </View>
 
             <View style={{ marginTop: 20 }}>
@@ -811,16 +913,28 @@ const AddPatientScreen = ({ navigation }) => {
                     <Text style={styles.buttonText}>Previous</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
+                {currentStep != 3 && <TouchableOpacity
                     style={[
                         styles.button,
-                        currentStep === 4 && styles.disabledButton,
+                        currentStep === 3 && styles.disabledButton,
                     ]}
                     onPress={handleNextStep}
-                    disabled={currentStep === 4}
+                    disabled={currentStep === 3}
                 >
                     <Text style={styles.buttonText}>Next</Text>
-                </TouchableOpacity>
+                </TouchableOpacity>}
+                {
+                    currentStep === 3 &&
+                    <TouchableOpacity
+                        style={[
+                            styles.button,
+                            { backgroundColor: 'green' }
+                        ]}
+                        onPress={() => { console.log('Press') }}
+                    >
+                        <Text style={[styles.buttonText, { color: '#fff' }]}>Submit</Text>
+                    </TouchableOpacity>
+                }
             </View>
             <Toast />
             <Modal

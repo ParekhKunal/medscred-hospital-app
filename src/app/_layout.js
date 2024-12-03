@@ -20,6 +20,7 @@ import NotificationScreen from './screens/notification';
 import MyProfileDetailScreen from './screens/profiledetails';
 import AddPatientScreen from './screens/addpatient';
 import PatientDetailScreen from './screens/patientdetails';
+import DischargeDetailScreen from './screens/dischargedetails';
 
 import DashboardScreen from "."
 import ProfileScreen from "./profile"
@@ -150,13 +151,18 @@ const LoanStack = () => {
             }}
         >
             <Stack.Screen
-                name="Discharge"
+                name="index"
                 component={LoansScreen}
                 options={{ headerShown: false }}
             />
             <Stack.Screen
                 name="Notification"
                 component={NotificationScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="DischargeDetails"
+                component={DischargeDetailScreen}
                 options={{ headerShown: false }}
             />
         </Stack.Navigator>

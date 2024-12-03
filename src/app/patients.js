@@ -114,7 +114,7 @@ const PatientsScreen = ({ navigation }) => {
 
             <FlatList
                 data={filteredPatients}
-                keyExtractor={(item, index) => (item.patient_id ? item.patient_id.toString() : index.toString())}
+                keyExtractor={(item, index) => `${item.patient_id || index}`}
                 contentContainerStyle={{ padding: 16 }}
                 renderItem={({ item }) => (
                     <TouchableOpacity
