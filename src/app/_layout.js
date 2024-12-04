@@ -241,9 +241,6 @@ export default RootLayout = () => {
 function AppNavigator() {
     const { token, user } = useAuth();
 
-    console.log('Token in AppNavigator:', token);
-    console.log('User Role', user?.role);
-
     if (!token) {
         return (
             <Stack.Navigator>

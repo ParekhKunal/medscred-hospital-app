@@ -17,7 +17,7 @@ const AddPatientScreen = ({ navigation }) => {
     const [animation] = useState(new Animated.Value(0));
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [hospitalType, setHospitalType] = useState([])
-
+    const [errors, setErrors] = useState({ email: '', phone_number: '', aadhar_card: '', pan_card: '' });
     const [formData, setFormData] = useState({
         firstName: '',
         middleName: '',
@@ -49,7 +49,7 @@ const AddPatientScreen = ({ navigation }) => {
         insuredAadhaarBack: null,
         insuredPanCard: null,
         insuredInsuranceCard: null,
-        showModal: false,  // State for showing the modal
+        showModal: false,
         selectedField: '',
     });
 
@@ -62,7 +62,7 @@ const AddPatientScreen = ({ navigation }) => {
 
                 const processedTypes = data[0]?.account_type.split(',').map((type, index) => ({
                     label: type.trim(),
-                    value: index + 1, // Start values from 1
+                    value: index + 1,
                 }));
 
                 setHospitalType(processedTypes || []);
@@ -197,7 +197,40 @@ const AddPatientScreen = ({ navigation }) => {
     };
 
     const handleInputChange = (field, value) => {
-        setFormData({ ...formData, [field]: value });
+
+        if (field === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            setErrors((prev) => ({
+                ...prev,
+                email: emailRegex.test(value) ? '' : 'Invalid email format',
+            }));
+        }
+
+        if (field === 'phone_number') {
+            setErrors((prev) => ({
+                ...prev,
+                phone_number: value.length === 10 ? '' : 'Phone Number must be 10 digits',
+            }));
+        }
+        if (field === 'aadhar_card') {
+            setErrors((prev) => ({
+                ...prev,
+                aadhar_card: value.length === 12 ? '' : 'Aadhaar Card must be 12 digits',
+            }));
+        }
+        if (field === 'pan_card') {
+            setErrors((prev) => ({
+                ...prev,
+                pan_card: value.length === 10 ? '' : 'PAN Card must be 10 digits',
+            }));
+        }
+
+        setFormData((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
+
+        // setFormData({ ...formData, [field]: value });
     };
 
     const isFormValid = () => {
@@ -445,6 +478,7 @@ const AddPatientScreen = ({ navigation }) => {
                                 keyboardType='email-address'
                                 style={styles.input}
                             />
+                            {errors.phone_number ? <Text style={styles.error}>{errors.email}</Text> : null}
                         </View>
                         <View style={styles.inputContainer}>
                             <Text style={styles.inputLabel}>
@@ -459,6 +493,7 @@ const AddPatientScreen = ({ navigation }) => {
                                 keyboardType='phone-pad'
                                 style={styles.input}
                             />
+                            {errors.phone_number ? <Text style={styles.error}>{errors.phone_number}</Text> : null}
                         </View>
                         <View style={styles.inputContainer}>
                             <Text style={styles.inputLabel}>Gender<Text style={{ color: 'red' }}>*</Text></Text>
@@ -486,7 +521,7 @@ const AddPatientScreen = ({ navigation }) => {
                                 style={styles.input}
                             >
                                 <Text style={styles.inputText}>
-                                    {formData.date_of_birth ? formData.date_of_birth.toISOString().split('T')[0] : 'Select Date'}
+                                    {formData.date_of_birth ? formData?.date_of_birth?.toISOString()?.split('T')[0] : 'Select Date'}
                                 </Text>
                             </TouchableOpacity>
                             {showDatePicker && (
@@ -519,6 +554,7 @@ const AddPatientScreen = ({ navigation }) => {
                                 keyboardType='phone-pad'
                                 style={styles.input}
                             />
+                            {errors.aadhar_card ? <Text style={styles.error}>{errors.aadhar_card}</Text> : null}
                         </View>
                         <View style={styles.inputContainer}>
                             <Text style={styles.inputLabel}>
@@ -530,9 +566,9 @@ const AddPatientScreen = ({ navigation }) => {
                                 onChangeText={(text) =>
                                     handleInputChange('pan_card', text)
                                 }
-                                keyboardType='phone-pad'
                                 style={styles.input}
                             />
+                            {errors.pan_card ? <Text style={styles.error}>{errors.pan_card}</Text> : null}
                         </View>
                     </>
                 );
@@ -1124,6 +1160,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#dc3545',
     },
     pdfPreviewContainer: {
+    },
+    error: {
+        color: 'red',
+        fontSize: 12,
     },
 });
 

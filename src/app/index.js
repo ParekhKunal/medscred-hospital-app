@@ -48,7 +48,7 @@ const DashboardScreen = ({ navigation }) => {
 
     return (
         <>
-            <SafeAreaView style={{ backgroundColor: '#fff', flex: 1 }}>
+            <SafeAreaView style={{ backgroundColor: '#fff', flex: 1, paddingBottom: 80 }}>
                 <FlatList
                     data={patients.slice(0, 5)}
                     keyExtractor={(item, index) => `${item.patient_id || index}`}
@@ -111,9 +111,9 @@ const DashboardScreen = ({ navigation }) => {
                     }
                     renderItem={({ item }) => (
                         <TouchableOpacity
-                            onPress={() => navigation.navigate('PatientDetails', { id: item.id })}
+                            onPress={() => navigation.navigate('PatientDetails', { id: item.patient_id })}
                             accessibilityRole="button"
-                            key={item.id}
+                            key={item.patient_id}
                             style={{ paddingHorizontal: 20 }}
                             accessibilityLabel={`View details for ${item.first_name} ${item.last_name}`}
                         >

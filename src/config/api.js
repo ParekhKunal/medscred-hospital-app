@@ -49,6 +49,7 @@ const supportForm = async (payload, config) => {
 
 const hospitalAccountType = async (token) => {
     try {
+
         const response = await axios.get(`${BASE_URL}/v1/hospitals/account-types`, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -76,4 +77,35 @@ const caseList = async (token) => {
     }
 }
 
-export { profileInfoApi, patientList, supportForm, hospitalAccountType, caseList }
+const dischargeDataUpdate = async (token, payload) => {
+    try {
+
+        const response = await axios.post(`${BASE_URL}/v1/hospital-mobile/discharge`, payload, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data'
+            },
+        })
+
+        return response
+
+    } catch (error) {
+        console.log(error);
+
+    }
+}
+
+const getDischargeDetail = async (token, caseId) => {
+    try {
+        const response = await axios.get(`${BASE_URL}/v1/hospital-mobile/discharge/${caseId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export { profileInfoApi, patientList, supportForm, hospitalAccountType, caseList, dischargeDataUpdate, getDischargeDetail }

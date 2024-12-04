@@ -120,6 +120,7 @@ const PatientsScreen = ({ navigation }) => {
                     <TouchableOpacity
                         onPress={() => navigation.navigate('PatientDetails', { id: item.patient_id })}
                         accessibilityRole="button"
+                        key={item.patient_id}
                         accessibilityLabel={`View details for ${item.first_name} ${item.last_name}`}
                     >
                         <View style={styles.patientCard}>

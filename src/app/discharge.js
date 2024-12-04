@@ -16,22 +16,22 @@ const LoansScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
 
-    useEffect(() => {
 
-        const fetchCaseList = async () => {
+    const fetchCaseList = async () => {
 
-            try {
-                setLoading(true)
-                const data = await caseList(token);
-                setCaseData(data.data)
-            } catch (error) {
-                console.error(error)
-            } finally {
-                setLoading(false)
-                setRefreshing(false);
-            }
+        try {
+            setLoading(true)
+            const data = await caseList(token);
+            setCaseData(data.data)
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setLoading(false)
+            setRefreshing(false);
         }
+    }
 
+    useEffect(() => {
         if (token) {
             fetchCaseList();
         }
@@ -47,14 +47,14 @@ const LoansScreen = ({ navigation }) => {
         <>
             <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
                 <Header user={user} />
-                <Text style={styles.screenTitle}>Case List</Text>
+                <Text style={styles.screenTitle}>Discharge Patient List</Text>
                 <FlatList
                     data={caseData}
                     keyExtractor={(item, index) => `${item.case_id || index}`}
                     contentContainerStyle={{ padding: 16 }}
                     renderItem={({ item }) => (
                         <TouchableOpacity
-                            onPress={() => navigation.navigate('DischargeDetails', { id: item.patient_id })}
+                            onPress={() => navigation.navigate('DischargeDetails', { id: item.case_id, data: item })}
                             accessibilityRole="button"
                             accessibilityLabel={`View details for ${item.first_name} ${item.last_name}`}
                         >
