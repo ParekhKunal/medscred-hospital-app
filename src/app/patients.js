@@ -20,6 +20,7 @@ const PatientsScreen = ({ navigation }) => {
     const [isFilterVisible, setFilterVisible] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState('');
     const [refreshing, setRefreshing] = useState(false);
+    const [totalRecords, setTotalRecords] = useState()
 
     const fetchPatientList = useCallback(async (resetPage = false) => {
         try {
@@ -33,6 +34,7 @@ const PatientsScreen = ({ navigation }) => {
             );
             setPage(currentPage);
             setTotalPages(pagination.totalPages);
+            setTotalRecords(pagination.totalRecords)
         } catch (error) {
             console.error('Failed to fetch patients:', error);
             Alert.alert('Error', 'Unable to load patients. Please try again later.');
@@ -43,23 +45,30 @@ const PatientsScreen = ({ navigation }) => {
     }, [token, page, limit]);
 
     useEffect(() => {
-        fetchPatientList();
-    }, [token, page]);
+        fetchPatientList(true);
+    }, [token]);
 
-    // Memoized Filtered Patients
     const filteredPatients = useMemo(() => {
         return patients.filter((patient) => {
             const fullName = `${patient.first_name} ${patient.middle_name || ''} ${patient.last_name}`.toLowerCase();
-            const matchesSearch = fullName.includes(searchQuery.toLowerCase());
+            const email = patient.email?.toLowerCase() || '';
+            const phoneNumber = patient.phone_number?.toLowerCase() || '';
+            const searchQueryLower = searchQuery.toLowerCase();
+
+            const matchesSearch =
+                fullName.includes(searchQueryLower) ||
+                email.includes(searchQueryLower) ||
+                phoneNumber.includes(searchQueryLower);
+
             const matchesStatus =
                 selectedStatus === 'All' ||
                 selectedStatus === '' ||
                 patient.status === selectedStatus;
+
             return matchesSearch && matchesStatus;
         });
     }, [patients, searchQuery, selectedStatus]);
 
-    // Pagination Handler
     const handleEndReached = () => {
         if (page < totalPages && !loading) {
             setPage(prevPage => prevPage + 1);
@@ -70,21 +79,25 @@ const PatientsScreen = ({ navigation }) => {
     const debouncedSearch = useCallback(
         debounce((query) => {
             setSearchQuery(query);
-        }, 300),
-        []
+            setPage(1); // Reset to page 1 when search query changes
+            fetchPatientList(true); // Fetch data with the new query
+        }, 1000),
+        [fetchPatientList]
     );
 
     // Refresh Control
     const onRefresh = useCallback(() => {
         setRefreshing(true);
         fetchPatientList(true);
-    }, []);
+    }, [fetchPatientList]);
 
     const statuses = ['All', 'Admitted', 'Discharged', 'Under Observation'];
 
     const handleFilterApply = (status) => {
         setSelectedStatus(status);
         setFilterVisible(false);
+        setPage(1); // Reset to page 1 when filter changes
+        fetchPatientList(true); // Fetch data with the new filter
     };
 
     const handleAddPatient = () => {
@@ -103,18 +116,14 @@ const PatientsScreen = ({ navigation }) => {
                     onChangeText={(text) => debouncedSearch(text)}
                     accessibilityLabel="Search patients"
                 />
-                {/* <TouchableOpacity
-                    onPress={() => setFilterVisible(true)}
-                    style={styles.filterButton}
-                    accessibilityLabel="Filter patients"
-                >
-                    <Ionicons name="filter" size={24} color="#fff" />
-                </TouchableOpacity> */}
+            </View>
+            <View style={{ paddingHorizontal: 20 }}>
+                <Text style={{ fontSize: 14, textAlign: 'right', fontFamily: 'Lexend_400Regular' }}>{totalRecords ? `Total Patients ${totalRecords}` : ''}</Text>
             </View>
 
             <FlatList
                 data={filteredPatients}
-                keyExtractor={(item, index) => `${item.patient_id || index}`}
+                keyExtractor={(item) => `${item.patient_id}`}
                 contentContainerStyle={{ padding: 16 }}
                 renderItem={({ item }) => (
                     <TouchableOpacity
@@ -147,10 +156,6 @@ const PatientsScreen = ({ navigation }) => {
                     </Text>
                 }
                 ListFooterComponent={loading ? <ActivityIndicator size="large" color="#007AFF" /> : null}
-                initialNumToRender={10}
-                maxToRenderPerBatch={10}
-                windowSize={21}
-                removeClippedSubviews={true}
                 onEndReached={handleEndReached}
                 onEndReachedThreshold={0.5}
                 refreshing={refreshing}
@@ -166,44 +171,6 @@ const PatientsScreen = ({ navigation }) => {
                     <Ionicons name="add-outline" size={38} color="#fff" />
                 </TouchableOpacity>
             </View>
-
-            <Modal
-                visible={isFilterVisible}
-                transparent={true}
-                animationType="slide"
-                accessibilityLabel="Filter patients modal"
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.filterModal}>
-                        <Text style={styles.modalTitle}>Filter by Status</Text>
-                        {statuses.map((status, index) => (
-                            <TouchableOpacity
-                                key={index}
-                                onPress={() => handleFilterApply(status)}
-                                style={[
-                                    styles.filterOption,
-                                    selectedStatus === status && styles.selectedFilterOption,
-                                ]}
-                            >
-                                <Text
-                                    style={[
-                                        styles.filterOptionText,
-                                        selectedStatus === status && styles.selectedFilterText,
-                                    ]}
-                                >
-                                    {status}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                        <TouchableOpacity
-                            style={styles.closeModalButton}
-                            onPress={() => setFilterVisible(false)}
-                        >
-                            <Ionicons name="close-circle" size={28} color="#d9534f" />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
         </SafeAreaView>
     );
 }

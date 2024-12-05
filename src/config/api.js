@@ -1,6 +1,7 @@
 import axios from "axios"
 
 const BASE_URL = 'https://8f2s3z7k-5500.inc1.devtunnels.ms/api'
+// const BASE_URL = 'https://api.medscred.com/api'
 
 const profileInfoApi = async (token) => {
     try {
@@ -108,4 +109,18 @@ const getDischargeDetail = async (token, caseId) => {
     }
 }
 
-export { profileInfoApi, patientList, supportForm, hospitalAccountType, caseList, dischargeDataUpdate, getDischargeDetail }
+const emiDetails = async (token) => {
+    try {
+        const response = await axios.get(`${BASE_URL}/v1/general/emi-plans`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response
+
+    } catch (error) {
+        return error
+    }
+}
+
+export { profileInfoApi, patientList, supportForm, hospitalAccountType, caseList, dischargeDataUpdate, getDischargeDetail, emiDetails }

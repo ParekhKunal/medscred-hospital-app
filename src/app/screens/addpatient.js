@@ -9,7 +9,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext'
-import { hospitalAccountType } from '../../config/api';
+import { emiDetails, hospitalAccountType } from '../../config/api';
 
 const AddPatientScreen = ({ navigation }) => {
     const { user, token } = useAuth();
@@ -17,6 +17,7 @@ const AddPatientScreen = ({ navigation }) => {
     const [animation] = useState(new Animated.Value(0));
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [hospitalType, setHospitalType] = useState([])
+    const [emiPlan, setEmiPlan] = useState([])
     const [errors, setErrors] = useState({ email: '', phone_number: '', aadhar_card: '', pan_card: '' });
     const [formData, setFormData] = useState({
         firstName: '',
@@ -51,6 +52,12 @@ const AddPatientScreen = ({ navigation }) => {
         insuredInsuranceCard: null,
         showModal: false,
         selectedField: '',
+        invoice_number: '', //aesthetic
+        payment_amount: '',
+        emi_month: '',
+        emi_interest: '',
+        treatmentDoc: null,
+        invoiceCopy: null
     });
 
     useEffect(() => {
@@ -72,7 +79,23 @@ const AddPatientScreen = ({ navigation }) => {
             }
         }
 
-        hospitalType()
+        const fetchEmiPlans = async () => {
+
+            try {
+
+                const data = await emiDetails(token);
+                setEmiPlan(data.data.data)
+
+            } catch (error) {
+                console.error(error)
+            }
+
+        }
+
+        if (token) {
+            hospitalType()
+            fetchEmiPlans()
+        }
 
     }, [token]);
 
@@ -225,6 +248,13 @@ const AddPatientScreen = ({ navigation }) => {
             }));
         }
 
+        if (field === 'emi_plan') {
+            const parsedValue = JSON.parse(value);
+            console.log('Selected EMI Plan:', parsedValue);
+            formData.emi_month = parsedValue.months
+            formData.emi_interest = parsedValue.interest
+        }
+
         setFormData((prev) => ({
             ...prev,
             [field]: value,
@@ -277,7 +307,7 @@ const AddPatientScreen = ({ navigation }) => {
         if (currentStep === 2) {
             if (formData.loan_type == 1) {
                 const fieldNames = {
-                    treating_doctor_name: 'Doctor Name',
+                    doctor_id: 'Doctor Name',
                     treatment_name: 'Treatment Name',
                     treatment_type: 'Treatment Type',
                     attendant_name: 'Attendant Name',
@@ -289,6 +319,41 @@ const AddPatientScreen = ({ navigation }) => {
                 };
 
                 const requiredFields = ['doctor_id', 'treatment_name', 'treatment_type', 'attendant_name', 'relationship_with_insured', 'estimated_amount', 'estimated_stay', 'is_patient_admitted', 'date_of_admission'];
+                const missingFields = [];
+
+                requiredFields.forEach(field => {
+                    if (!formData[field]) {
+                        missingFields.push(fieldNames[field]);
+                    }
+                });
+
+                if (missingFields.length > 0) {
+
+                    Vibration.vibrate(400);
+
+                    const message = `Please fill the following fields in Step 1: ${missingFields.join(', ')}`;
+                    Toast.show({
+                        type: 'error',
+                        position: 'top',
+                        text1: 'Form Incomplete',
+                        text2: message,
+                        visibilityTime: 5000,
+                        autoHide: true,
+                        draggable: true,
+                        topOffset: 100,
+                        bottomOffset: 40,
+                    });
+                    return false;
+                }
+            }
+            if (formData.loan_type == 3) {
+                const fieldNames = {
+                    doctor_id: 'Doctor Name',
+                    treatment_name: 'Treatment Name',
+                    emi_plan: 'EMI Plan',
+                };
+
+                const requiredFields = ['doctor_id', 'treatment_name', 'emi_plan'];
                 const missingFields = [];
 
                 requiredFields.forEach(field => {
@@ -339,6 +404,46 @@ const AddPatientScreen = ({ navigation }) => {
                 } else {
                     requiredFields = ['passportPhoto', 'aadhaarFront', 'aadhaarBack', 'aadhaarBack', 'insuranceCard'];
                 }
+                const missingFields = [];
+
+                requiredFields.forEach(field => {
+                    if (!formData[field]) {
+                        missingFields.push(fieldNames[field]);
+                    }
+                });
+
+                if (missingFields.length > 0) {
+
+                    Vibration.vibrate(400);
+
+                    const message = `Please fill the following fields in Step 1: ${missingFields.join(', ')}`;
+                    Toast.show({
+                        type: 'error',
+                        position: 'top',
+                        text1: 'Form Incomplete',
+                        text2: message,
+                        visibilityTime: 5000,
+                        autoHide: true,
+                        draggable: true,
+                        topOffset: 100,
+                        bottomOffset: 40,
+                    });
+                    return false;
+                }
+            }
+            if (formData.loan_type == 3) {
+                const fieldNames = {
+                    passportPhoto: 'Patient Passort Photo',
+                    aadhaarFront: 'Aadhaar Card Front',
+                    aadhaarBack: 'Aadhaar Card Back',
+                    panCard: 'PAN Card',
+                    treatmentDoc: 'Treatment Doc',
+                    invoiceCopy: 'Invoice Copy'
+                };
+
+
+                const requiredFields = ['passportPhoto', 'aadhaarFront', 'aadhaarBack', 'panCard', 'treatmentDoc', 'invoiceCopy'];
+
                 const missingFields = [];
 
                 requiredFields.forEach(field => {
@@ -742,8 +847,8 @@ const AddPatientScreen = ({ navigation }) => {
                             formData.loan_type == 2 &&
                             (
                                 <>
-                                    <View>
-                                        <Text>Cashless Form</Text>
+                                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                        <Text style={{ textAlign: 'center' }}>Cashless Form</Text>
                                     </View>
                                 </>
                             )
@@ -752,8 +857,57 @@ const AddPatientScreen = ({ navigation }) => {
                             formData.loan_type == 3 &&
                             (
                                 <>
-                                    <View>
-                                        <Text>Aesthetic Form</Text>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>Treatment Name<Text style={{ color: 'red' }}>*</Text></Text>
+                                        <TextInput
+                                            placeholder="Treatment Name"
+                                            value={formData.treatment_name}
+                                            onChangeText={(text) =>
+                                                handleInputChange('treatment_name', text)
+                                            }
+                                            style={styles.input}
+                                        />
+                                    </View>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>
+                                            Treating Doctor Name<Text style={{ color: 'red' }}>*</Text>
+                                        </Text>
+                                        <TextInput
+                                            placeholder="Treating Doctor Name"
+                                            value={formData.doctor_id}
+                                            onChangeText={(text) =>
+                                                handleInputChange('doctor_id', text)
+                                            }
+                                            style={styles.input}
+                                        />
+                                    </View>
+                                    {/* payment_amount: '',
+                                    emi_month: '',
+                                    emi_interest: '',
+                                    treatmentDoc: null,
+                                    invoiceCopy: null */}
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>EMI Plan<Text style={{ color: 'red' }}>*</Text></Text>
+                                        <View style={{ borderWidth: 1, height: 50, borderColor: '#D4D4D4', borderRadius: 6, justifyContent: 'center' }}>
+                                            <Picker
+                                                selectedValue={formData.emi_plan}
+                                                onValueChange={(itemValue) =>
+                                                    handleInputChange('emi_plan', itemValue)
+                                                }
+                                                style={styles.picker}
+                                            >
+                                                {
+                                                    emiPlan.map((item) => {
+                                                        return (
+                                                            <Picker.Item key={item.id} label={item.months ? `${item.months} at ${item.interest}% Interest Rate` : ''}
+                                                                value={JSON.stringify({ months: item.months, interest: item.interest })}
+                                                            />
+                                                        )
+                                                    })
+                                                }
+
+                                            </Picker>
+                                        </View>
                                     </View>
                                 </>
                             )
@@ -852,8 +1006,8 @@ const AddPatientScreen = ({ navigation }) => {
                         {
                             formData.loan_type == 2 && (
                                 <>
-                                    <View>
-                                        <Text>Cashless Document</Text>
+                                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                        <Text style={{ textAlign: 'center' }}>Cashless Document</Text>
                                     </View>
                                 </>
                             )
@@ -861,8 +1015,41 @@ const AddPatientScreen = ({ navigation }) => {
                         {
                             formData.loan_type == 3 && (
                                 <>
-                                    <View>
-                                        <Text>Aesthetic Document</Text>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>
+                                            Aadhaar Card Front<Text style={{ color: 'red' }}>*</Text>
+                                        </Text>
+                                        <TouchableOpacity onPress={() => toggleModal('aadhaarFront')} style={styles.uploadButton}>
+                                            <Text style={styles.uploadButtonText}>Upload Aadhaar Front</Text>
+                                        </TouchableOpacity>
+                                        {renderFilePreview('aadhaarFront')}
+                                    </View>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>
+                                            PAN Card<Text style={{ color: 'red' }}>*</Text>
+                                        </Text>
+                                        <TouchableOpacity onPress={() => toggleModal('panCard')} style={styles.uploadButton}>
+                                            <Text style={styles.uploadButtonText}>Upload PAN</Text>
+                                        </TouchableOpacity>
+                                        {renderFilePreview('panCard')}
+                                    </View>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>
+                                            Treatment Doc<Text style={{ color: 'red' }}>*</Text>
+                                        </Text>
+                                        <TouchableOpacity onPress={() => toggleModal('treatmentDoc')} style={styles.uploadButton}>
+                                            <Text style={styles.uploadButtonText}>Upload Treatment Doc</Text>
+                                        </TouchableOpacity>
+                                        {renderFilePreview('treatmentDoc')}
+                                    </View>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.inputLabel}>
+                                            Invoice Copy<Text style={{ color: 'red' }}>*</Text>
+                                        </Text>
+                                        <TouchableOpacity onPress={() => toggleModal('invoiceCopy')} style={styles.uploadButton}>
+                                            <Text style={styles.uploadButtonText}>Upload Invoice Copy</Text>
+                                        </TouchableOpacity>
+                                        {renderFilePreview('invoiceCopy')}
                                     </View>
                                 </>
                             )

@@ -34,6 +34,10 @@ const DischargeDetailScreen = ({ route, navigation }) => {
         discharge_summary: '',
         showModal: false,
         selectedField: '',
+        bank_name: '',
+        account_holder_name: '',
+        account_number: '',
+        bank_doc: null,
     });
 
     const toggleModal = (field) => {
@@ -118,13 +122,11 @@ const DischargeDetailScreen = ({ route, navigation }) => {
         });
 
         if (result.canceled) {
-            console.log('Document selection was canceled');
             return;
         }
 
         if (result.assets && result.assets.length > 0) {
             const file = result.assets[0];
-            console.log('Selected document:', file);
 
             setFormData((prevFormData) => ({
                 ...prevFormData,
@@ -137,7 +139,6 @@ const DischargeDetailScreen = ({ route, navigation }) => {
     };
 
     const renderFilePreview = (fileName) => {
-        console.log('Rendering preview for:', fileName);
 
         if (formData[fileName]) {
             const fileUri = formData[fileName];
@@ -245,7 +246,6 @@ const DischargeDetailScreen = ({ route, navigation }) => {
                 }
             });
 
-            // Robust file handling
             if (formData.final_bill && formData.final_bill.length !== 0) {
                 const fileUri = formData.final_bill;
 
@@ -263,7 +263,23 @@ const DischargeDetailScreen = ({ route, navigation }) => {
                 }
             }
 
-            // Uncomment when ready to send
+            if (formData.bank_doc && formData.bank_doc.length !== 0) {
+                const fileUri = formData.bank_doc;
+
+                if (typeof fileUri === 'string') {
+                    const fileType = fileUri.toLowerCase().includes('.pdf')
+                        ? 'application/pdf'
+                        : 'image/jpeg';
+                    const fileName = fileUri.split('/').pop();
+
+                    formDataPayload.append('bank_doc', {
+                        uri: fileUri,
+                        type: fileType,
+                        name: fileName
+                    });
+                }
+            }
+
             const response = await dischargeDataUpdate(token, formDataPayload);
 
             console.log('Payload ready to send', response.data);
@@ -332,10 +348,70 @@ const DischargeDetailScreen = ({ route, navigation }) => {
                 <ScrollView style={{ marginBottom: 100 }}>
                     <View>
                         <View style={{ marginTop: 20, marginBottom: 20 }}>
-                            <Text style={{ fontFamily: 'Lexend_600SemiBold', fontSize: 18, textAlign: 'center' }}>Update Discharge Details</Text>
+                            <Text style={{ fontFamily: 'Lexend_600SemiBold', fontSize: 18, textAlign: 'center' }}>Update Discharge & Bank Details</Text>
                         </View>
                         <View style={{ height: 1, backgroundColor: '#ECECEC', alignSelf: 'stretch', opacity: 0.5, marginBottom: 20 }} />
-
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.inputLabel}>
+                                Account Number<Text style={{ color: 'red' }}>*</Text>
+                            </Text>
+                            <TextInput
+                                placeholder="Account Number"
+                                value={formData.account_number}
+                                onChangeText={(text) =>
+                                    handleInputChange('account_number', text)
+                                }
+                                style={styles.input}
+                            />
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.inputLabel}>
+                                Account Holder Name<Text style={{ color: 'red' }}>*</Text>
+                            </Text>
+                            <TextInput
+                                placeholder="Account Holder Name"
+                                value={formData.account_holder_name}
+                                onChangeText={(text) =>
+                                    handleInputChange('account_holder_name', text)
+                                }
+                                style={styles.input}
+                            />
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.inputLabel}>
+                                Bank Name<Text style={{ color: 'red' }}>*</Text>
+                            </Text>
+                            <TextInput
+                                placeholder="Bank Name"
+                                value={formData.bank_name}
+                                onChangeText={(text) =>
+                                    handleInputChange('bank_name', text)
+                                }
+                                style={styles.input}
+                            />
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.inputLabel}>
+                                IFSC Code<Text style={{ color: 'red' }}>*</Text>
+                            </Text>
+                            <TextInput
+                                placeholder="IFSC Code"
+                                value={formData.ifsc_code}
+                                onChangeText={(text) =>
+                                    handleInputChange('ifsc_code', text)
+                                }
+                                style={styles.input}
+                            />
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.inputLabel}>
+                                Upload Cancelled Cheque<Text style={{ color: 'red' }}>*</Text>
+                            </Text>
+                            <TouchableOpacity onPress={() => toggleModal('bank_doc')} style={styles.uploadButton}>
+                                <Text style={styles.uploadButtonText}>Upload Cancelled Cheque or Take Photo</Text>
+                            </TouchableOpacity>
+                            {renderFilePreview('bank_doc')}
+                        </View>
                         <View style={styles.inputContainer}>
                             <Text style={styles.inputLabel}>
                                 Date of Admission<Text style={{ color: 'red' }}>*</Text>

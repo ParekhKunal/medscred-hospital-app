@@ -6,6 +6,7 @@ import Toast from 'react-native-toast-message';
 const AuthContext = createContext(undefined);
 
 const API_URL = 'https://8f2s3z7k-5500.inc1.devtunnels.ms/api'
+// const API_URL = 'https://api.medscred.com/api'
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
