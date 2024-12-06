@@ -9,7 +9,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext'
-import { emiDetails, hospitalAccountType } from '../../config/api';
+import { emiDetails, hospitalAccountType, admitPatients } from '../../config/api';
 
 const AddPatientScreen = ({ navigation }) => {
     const { user, token } = useAuth();
@@ -1067,6 +1067,21 @@ const AddPatientScreen = ({ navigation }) => {
         }
     };
 
+    const onFinish = async()=>{
+        try {
+
+            console.log(formData);
+
+            // const response = await admitPatients(token,payload);
+
+            // console.log(response.data.data);
+            
+        } catch (error) {
+            console.log(error);
+            
+        }
+    }
+ 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.stepsContainer}>
@@ -1153,7 +1168,7 @@ const AddPatientScreen = ({ navigation }) => {
                             styles.button,
                             { backgroundColor: 'green' }
                         ]}
-                        onPress={() => { console.log('Press') }}
+                        onPress={onFinish}
                     >
                         <Text style={[styles.buttonText, { color: '#fff' }]}>Submit</Text>
                     </TouchableOpacity>

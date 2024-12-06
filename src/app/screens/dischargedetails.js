@@ -9,7 +9,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 
 import Toast from 'react-native-toast-message';
-import { dischargeDataUpdate, getDischargeDetail } from '../../config/api';
+import { dischargeDataUpdate, getDischargeDetail, dishcargePatients } from '../../config/api';
 
 const DischargeDetailScreen = ({ route, navigation }) => {
 

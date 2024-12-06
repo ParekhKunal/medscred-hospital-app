@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const BASE_URL = 'https://8f2s3z7k-5500.inc1.devtunnels.ms/api'
+const BASE_URL = 'https://m8k2bhtr-5500.inc1.devtunnels.ms/api'
 // const BASE_URL = 'https://api.medscred.com/api'
 
 const profileInfoApi = async (token) => {
@@ -123,4 +123,46 @@ const emiDetails = async (token) => {
     }
 }
 
-export { profileInfoApi, patientList, supportForm, hospitalAccountType, caseList, dischargeDataUpdate, getDischargeDetail, emiDetails }
+const dishcargePatients = async (token) => {
+    try {
+        const response = await axios.get(`${BASE_URL}/v1/hospital-mobile/discharge`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response
+
+    } catch (error) {
+        return error
+    }
+}
+
+const admitPatients = async (token,payload) => {
+    try {
+        const response = await axios.get(`${BASE_URL}/v1/hospital-mobile/unified-onboarding`,{payload}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response
+
+    } catch (error) {
+        return error
+    }
+}
+
+const editPatients = async (token, patient, payload) => {
+    try {
+        const response = await axios.get(`${BASE_URL}/v1/hospital-mobile/edit/${patient}`,{payload}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response
+
+    } catch (error) {
+        return error
+    }
+}
+
+export { profileInfoApi, patientList, supportForm, hospitalAccountType, caseList, dischargeDataUpdate, getDischargeDetail, emiDetails, dishcargePatients, admitPatients, editPatients }
