@@ -119,8 +119,20 @@ const emiDetails = async (token) => {
         return response
 
     } catch (error) {
+
         return error
     }
 }
 
-export { profileInfoApi, patientList, supportForm, hospitalAccountType, caseList, dischargeDataUpdate, getDischargeDetail, emiDetails }
+const forgotPasswordRequest = async (formData) => {
+    try {
+        console.log(formData);
+        const response = await axios.post(`${BASE_URL}/v1/hospital-mobile/forgot-password-request`, formData)
+
+        return response
+    } catch (error) {
+        return error
+    }
+}
+
+export { profileInfoApi, patientList, supportForm, hospitalAccountType, caseList, dischargeDataUpdate, getDischargeDetail, emiDetails, forgotPasswordRequest }

@@ -50,6 +50,7 @@ const LoansScreen = ({ navigation }) => {
                 <Text style={styles.screenTitle}>Discharge Patient List</Text>
                 <FlatList
                     data={caseData}
+                    style={{ marginBottom: 80 }}
                     keyExtractor={(item, index) => `${item.case_id || index}`}
                     contentContainerStyle={{ padding: 16 }}
                     renderItem={({ item }) => (

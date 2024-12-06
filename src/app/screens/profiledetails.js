@@ -207,7 +207,7 @@ const MyProfileDetailScreen = ({ navigation }) => {
                                     </ScrollView>
                                 </View>
                                 <Toast />
-                            </SafeAreaView >
+                            </SafeAreaView>
                         </>
                     ) : (
                         <Text>No Profile Data</Text>

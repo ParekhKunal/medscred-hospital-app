@@ -22,16 +22,27 @@ const PatientsScreen = ({ navigation }) => {
     const [refreshing, setRefreshing] = useState(false);
     const [totalRecords, setTotalRecords] = useState()
 
-    const fetchPatientList = useCallback(async (resetPage = false) => {
+    const fetchPatientList = useCallback(async (resetPage = false, pageToFetch = page) => {
+        if (loading) return; //new
+
         try {
             setLoading(true);
-            const currentPage = resetPage ? 1 : page;
-            const response = await patientList(token, currentPage, limit);
+
+            const currentPage = resetPage ? 1 : pageToFetch;
+
+            // const response = await patientList(token, currentPage, limit);
+
+            const response = await patientList(token, currentPage, limit, {
+                search: searchQuery,
+                status: selectedStatus
+            });
+
             const { data, pagination } = response.data;
 
             setPatients(prevPatients =>
                 resetPage ? data : [...prevPatients, ...data]
             );
+
             setPage(currentPage);
             setTotalPages(pagination.totalPages);
             setTotalRecords(pagination.totalRecords)
@@ -42,10 +53,10 @@ const PatientsScreen = ({ navigation }) => {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [token, page, limit]);
+    }, [token, page, limit, searchQuery, selectedStatus]);
 
     useEffect(() => {
-        fetchPatientList(true);
+        fetchPatientList(true, 1);
     }, [token]);
 
     const filteredPatients = useMemo(() => {
@@ -69,9 +80,19 @@ const PatientsScreen = ({ navigation }) => {
         });
     }, [patients, searchQuery, selectedStatus]);
 
+    // const handleEndReached = () => {
+    //     if (page < totalPages && !loading) {
+    //         const nextPage = page + 1;
+    //         setPage(nextPage);
+    //         fetchPatientList(false);
+    //     }
+    // };
+
     const handleEndReached = () => {
+
         if (page < totalPages && !loading) {
-            setPage(prevPage => prevPage + 1);
+            const nextPage = page + 1;
+            fetchPatientList(false, nextPage);
         }
     };
 
@@ -79,8 +100,8 @@ const PatientsScreen = ({ navigation }) => {
     const debouncedSearch = useCallback(
         debounce((query) => {
             setSearchQuery(query);
-            setPage(1); // Reset to page 1 when search query changes
-            fetchPatientList(true); // Fetch data with the new query
+            setPage(1);
+            fetchPatientList(true);
         }, 1000),
         [fetchPatientList]
     );
@@ -125,6 +146,7 @@ const PatientsScreen = ({ navigation }) => {
                 data={filteredPatients}
                 keyExtractor={(item) => `${item.patient_id}`}
                 contentContainerStyle={{ padding: 16 }}
+                style={{ marginBottom: 80 }}
                 renderItem={({ item }) => (
                     <TouchableOpacity
                         onPress={() => navigation.navigate('PatientDetails', { id: item.patient_id })}

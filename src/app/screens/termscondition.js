@@ -46,13 +46,73 @@ const TermsConditionsScreen = ({ navigation }) => {
                         <Text style={styles.text}>
                             Definitions and Interpretation
                         </Text>
-                        <Text style={styles.term}><Text style={styles.bold}>“Application” and/or “App”</Text> refers to a computer software designed for a handheld device;</Text>
-                        <Text style={styles.term}><Text style={styles.bold}>“Customers”; “User”</Text> means any person, organisation, or entity that accesses, uses or attempts to access and/or use MedsCred’s Website and/or Application and its allied Platforms (including Services);</Text>
-                        <Text style={styles.term}><Text style={styles.bold}>“Device”</Text> means mobile phones, personal digital assistance or combination of both or any other device used to communicate, send or transmit any text, video, audio or image;</Text>
-                        <Text style={styles.term}><Text style={styles.bold}>“Platform” and/or “MedsCred Platform”</Text> means a platform or digital platform in which a piece of software is executed including and not limited to hardware, operating software, web browser, associated application programming interfaces, or other underlying software.</Text>
-                        <Text style={styles.term}><Text style={styles.bold}>“Services”</Text> means any or all products, services that MedsCred provides and may provide as a financial technology platform.</Text>
-                        <Text style={styles.term}><Text style={styles.bold}>“Website”</Text> means a set of related web pages located under the domain name “www.medscred.com”</Text>
-                        <Text style={styles.term}>The terms <Text style={styles.bold}>“WE”, "OUR" and "US"</Text> refer to MedsCred and the terms <Text style={styles.bold}>“YOU”, "YOUR" "USER" or “CUSTOMER”</Text> refer to you, as a user of the MedsCred Website and/or App.</Text>
+                        <View style={styles.listItem}>
+                            <Text style={styles.bullet}>{'\u2022'}</Text>
+                            <Text style={styles.content}>
+                                <Text style={styles.bold}>“Application” and/or “App”</Text> refers to a computer software designed for a handheld device;
+                            </Text>
+                        </View>
+                        <View style={styles.listItem}>
+                            <Text style={styles.bullet}>{'\u2022'}</Text>
+                            <Text style={styles.content}>
+                                <Text style={styles.bold}>“Customers”; “User”</Text> means any person, organisation, or entity that accesses, uses or attempts to access and/or use MedsCred’s Website and/or Application and its allied Platforms (including Services);
+                            </Text>
+                        </View>
+                        <View style={styles.listItem}>
+                            <Text style={styles.bullet}>{'\u2022'}</Text>
+                            <Text style={styles.content}>
+                                <Text style={styles.bold}>“Device”</Text> means mobile phones, personal digital assistance or combination of both or any other device used to communicate, send or transmit any text, video, audio or image;
+                            </Text>
+                        </View>
+                        <View style={styles.listItem}>
+                            <Text style={styles.bullet}>{'\u2022'}</Text>
+                            <Text style={styles.content}>
+                                <Text style={styles.bold}>“Platform” and/or “MedsCred Platform”</Text> means a platform or digital platform in which a piece of software is executed including and not limited to hardware, operating software, web browser, associated application programming interfaces, or other underlying software.
+                            </Text>
+                        </View>
+                        <View style={styles.listItem}>
+                            <Text style={styles.bullet}>{'\u2022'}</Text>
+                            <Text style={styles.content}>
+                                <Text style={styles.bold}>“Services”</Text> means any or all products, services that MedsCred provides and may provide as a financial technology platform.
+                            </Text>
+                        </View>
+                        <View style={styles.listItem}>
+                            <Text style={styles.bullet}>{'\u2022'}</Text>
+                            <Text style={styles.content}>
+                                <Text style={styles.bold}>“Website”</Text> means a set of related web pages located under the domain name “www.medscred.com”
+                            </Text>
+                        </View>
+                        <Text style={styles.term}>
+                            The terms <Text style={styles.bold}>“WE”, "OUR" and "US"</Text> refer to MedsCred and the terms <Text style={styles.bold}>“YOU”, "YOUR" "USER" or “CUSTOMER”</Text> refer to you, as a user of the MedsCred Website and/or App.
+                        </Text>
+                        <Text style={[styles.text, { marginTop: 20 }]}>
+                            Services
+                        </Text>
+                        <View style={styles.listItem}>
+                            <Text style={styles.bullet}>{'\u2022'}</Text>
+                            <Text style={styles.content}>
+                                MedsCred provides and facilitates financial products and services via its website and/or App and other allied platforms for a hyper-distinctive customer centric service and experience.
+                            </Text>
+                        </View>
+                        <View style={styles.listItem}>
+                            <Text style={styles.bullet}>{'\u2022'}</Text>
+                            <Text style={styles.content}>
+                                You agree to provide accurate, current, and complete information about yourself/ person.
+                            </Text>
+                        </View>
+                        <View style={styles.listItem}>
+                            <Text>  - You agree to provide, maintain, and promptly update the Registration Data to be accurate, current, and complete.</Text>
+
+                        </View>
+                        <View style={styles.listItem}>
+                            <Text>  - If you provide any information that is inaccurate, not current or, incomplete or where MedsCred has reasonable ground to suspect that such information is inaccurate, not current, or incomplete, MedsCred has the right to suspend or terminate your account.</Text>
+                        </View>
+                        <View style={styles.listItem}>
+                            <Text style={styles.bullet}>{'\u2022'}</Text>
+                            <Text style={styles.content}>
+                                You may access and avail the Website and/or App and its allied Platforms as and when authorised by MedsCred. You are not authorized to commercially exploit the Website and/or App and its allied Platforms; anything in that respect will have to be specifically licensed by MedsCred
+                            </Text>
+                        </View>
                         <Link
                             href="https://medscred.com/terms-condition.html"
                             style={{ fontFamily: 'Lexend_300Light', textAlign: 'center', marginTop: 20 }}
@@ -111,6 +171,16 @@ const styles = StyleSheet.create({
         lineHeight: 22,
         color: '#101317',
         marginBottom: 8,
+    },
+    listItem: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        marginBottom: 12,
+    },
+    bullet: {
+        fontSize: 22,
+        lineHeight: 24,
+        marginRight: 8,
     },
     bold: {
         fontWeight: 'bold',

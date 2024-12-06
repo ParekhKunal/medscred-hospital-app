@@ -68,7 +68,7 @@ const DashboardScreen = ({ navigation }) => {
                                         </View>
                                     </View>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => navigation.navigate('Loans')}>
+                                <TouchableOpacity onPress={() => navigation.navigate('Patients')}>
                                     <View style={[styles.boxOne, { backgroundColor: '#EDFCF2' }]}>
                                         <View style={[styles.iconOne, { backgroundColor: '#AAF0C4', width: 50, alignItems: 'center' }]}>
                                             <FontAwesome6 name='newspaper' size={24} style={{ color: '#16B364' }} />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, ActivityIndicator, Pressable } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image, ActivityIndicator, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { useFontContext } from '../context/FontContext';
@@ -43,51 +43,58 @@ const ProfileScreen = ({ navigation }) => {
     return (
         <>
             <SafeAreaView style={styles.container}>
-                <View style={styles.profileContainer}>
-                    <Image source={require('../../assets/avatar.png')} style={styles.avatar} />
-                    <Text style={styles.profileName}>{user?.first_name} {user?.last_name}</Text>
-                    <Text style={styles.profileEmail}>{user?.email}</Text>
-                </View>
-                <View style={styles.profileOptionsContainer}>
-                    <View>
-                        <TouchableOpacity style={styles.myProfileOption} onPress={onPressMyProfile}>
-                            <Icons name="user" size={22} style={styles.icon} />
-                            <Text style={styles.optionText}>My Profile</Text>
-                            <Icons name="chevron-right" size={22} style={styles.iconRight} />
-                        </TouchableOpacity>
+                <ScrollView style={{ marginBottom: 100 }}>
+                    <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 30, marginBottom: 20 }}>
+                        <Image source={require('../../assets/logo-color.png')} style={{ resizeMode: 'contain', width: 180, height: 65 }} />
+                        <Text style={[styles.profileName, { marginTop: 0, fontSize: 14, fontFamily: 'Lexend_200ExtraLight' }]}>Simplifying All Healthcare Finance</Text>
                     </View>
-                    <View style={styles.horizontalLine} />
-                    <View>
-                        <TouchableOpacity style={styles.myProfileOption} onPress={onPressSupport}>
-                            <MaterialIcons name="support-agent" size={22} style={styles.icon} />
-                            <Text style={styles.optionText}>Support</Text>
-                            <Icons name="chevron-right" size={22} style={styles.iconRight} />
-                        </TouchableOpacity>
+                    <View style={[styles.horizontalLine, { paddingHorizontal: 20 }]} />
+                    <View style={styles.profileContainer}>
+                        <Image source={require('../../assets/avatar.png')} style={styles.avatar} />
+                        <Text style={[styles.profileName, { textAlign: 'center', fontSize: 18 }]}>{user?.first_name} {user?.last_name}</Text>
+                        <Text style={styles.profileEmail}>{user?.email}</Text>
                     </View>
-                    <View style={styles.horizontalLine} />
-                    <View>
-                        <TouchableOpacity style={styles.myProfileOption} onPress={onPressTermsCondition}>
-                            <MaterialIcons name="info-outline" size={22} style={styles.icon} />
-                            <Text style={styles.optionText}>Terms & Conditions</Text>
-                            <Icons name="chevron-right" size={22} style={styles.iconRight} />
-                        </TouchableOpacity>
+                    <View style={styles.profileOptionsContainer}>
+                        <View>
+                            <TouchableOpacity style={styles.myProfileOption} onPress={onPressMyProfile}>
+                                <Icons name="user" size={22} style={styles.icon} />
+                                <Text style={styles.optionText}>My Profile</Text>
+                                <Icons name="chevron-right" size={22} style={styles.iconRight} />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.horizontalLine} />
+                        <View>
+                            <TouchableOpacity style={styles.myProfileOption} onPress={onPressSupport}>
+                                <MaterialIcons name="support-agent" size={22} style={styles.icon} />
+                                <Text style={styles.optionText}>Support</Text>
+                                <Icons name="chevron-right" size={22} style={styles.iconRight} />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.horizontalLine} />
+                        <View>
+                            <TouchableOpacity style={styles.myProfileOption} onPress={onPressTermsCondition}>
+                                <MaterialIcons name="info-outline" size={22} style={styles.icon} />
+                                <Text style={styles.optionText}>Terms & Conditions</Text>
+                                <Icons name="chevron-right" size={22} style={styles.iconRight} />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.horizontalLine} />
+                        <View>
+                            <TouchableOpacity style={styles.myProfileOption} onPress={onPressAboutMedscred}>
+                                <Icons name="twitch" size={22} style={styles.icon} />
+                                <Text style={styles.optionText}>About MedsCred</Text>
+                                <Icons name="chevron-right" size={22} style={styles.iconRight} />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.horizontalLine} />
+                        <View>
+                            <TouchableOpacity style={styles.myProfileOption} onPress={onPressLogout}>
+                                <MaterialIcons name="logout" size={22} style={[styles.icon, { color: 'red', backgroundColor: '#FFCCCB' }]} />
+                                <Text style={[styles.optionText, { color: 'red' }]}>Log out</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                    <View style={styles.horizontalLine} />
-                    <View>
-                        <TouchableOpacity style={styles.myProfileOption} onPress={onPressAboutMedscred}>
-                            <Icons name="twitch" size={22} style={styles.icon} />
-                            <Text style={styles.optionText}>About MedsCred</Text>
-                            <Icons name="chevron-right" size={22} style={styles.iconRight} />
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.horizontalLine} />
-                    <View>
-                        <TouchableOpacity style={styles.myProfileOption} onPress={onPressLogout}>
-                            <MaterialIcons name="logout" size={22} style={[styles.icon, { color: 'red', backgroundColor: '#FFCCCB' }]} />
-                            <Text style={[styles.optionText, { color: 'red' }]}>Log out</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                </ScrollView>
             </SafeAreaView>
         </>
     );

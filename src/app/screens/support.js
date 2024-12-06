@@ -23,12 +23,10 @@ const SupportScreen = ({ navigation }) => {
 
     const handleInputChange = (field, value) => {
         setFormData({ ...formData, [field]: value });
-        console.log(`${field}: ${value}`);
     };
 
     const onSubmit = async () => {
         try {
-            console.log("hello");
 
             if (!formData.subject.trim() || !formData.message.trim()) {
                 Toast.show({
@@ -73,6 +71,10 @@ const SupportScreen = ({ navigation }) => {
                     subject: '',
                     message: '',
                 });
+
+                setTimeout(() => {
+                    navigation.goBack();
+                }, 2000);
             }
         } catch (error) {
             console.error('Error sending message:', error);
@@ -150,7 +152,7 @@ const SupportScreen = ({ navigation }) => {
                     </View>
                 </View>
                 <Toast />
-            </SafeAreaView >
+            </SafeAreaView>
         </>
     );
 }
