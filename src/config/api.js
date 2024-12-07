@@ -1,7 +1,7 @@
 import axios from "axios"
 
-const BASE_URL = 'https://8f2s3z7k-5500.inc1.devtunnels.ms/api'
-// const BASE_URL = 'https://api.medscred.com/api'
+// const BASE_URL = 'https://8f2s3z7k-5500.inc1.devtunnels.ms/api'
+const BASE_URL = 'https://api.medscred.com/api'
 
 const profileInfoApi = async (token) => {
     try {
@@ -78,10 +78,9 @@ const caseList = async (token) => {
     }
 }
 
-const dischargeDataUpdate = async (token, payload) => {
+const dischargeDataUpdate = async (token, payload, caseId) => {
     try {
-
-        const response = await axios.post(`${BASE_URL}/v1/hospital-mobile/discharge`, payload, {
+        const response = await axios.post(`${BASE_URL}/v1/hospital-mobile/discharge/${caseId}`, payload, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'multipart/form-data'
@@ -98,11 +97,13 @@ const dischargeDataUpdate = async (token, payload) => {
 
 const getDischargeDetail = async (token, caseId) => {
     try {
+
         const response = await axios.get(`${BASE_URL}/v1/hospital-mobile/discharge/${caseId}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         })
+
         return response
     } catch (error) {
         console.log(error);

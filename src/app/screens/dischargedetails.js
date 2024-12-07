@@ -17,6 +17,8 @@ const DischargeDetailScreen = ({ route, navigation }) => {
 
     const { id, data } = route.params || {};  // Safely access params
 
+    const patientId = data.patient_id
+
     const handleBackPress = () => {
         navigation.goBack();
     }
@@ -25,19 +27,23 @@ const DischargeDetailScreen = ({ route, navigation }) => {
     const [isModalVisible, setModalVisible] = useState(false);
 
     const [formData, setFormData] = useState({
+        patientId: patientId,
         caseId: id,
         date_of_admission: '',
         discharge_date: '',
-        mrn_number: '',
         final_bill_amount: '',
-        final_bill: '', //doc
-        discharge_summary: '',
-        showModal: false,
-        selectedField: '',
+        mrn_number: '',
+        invoice_number: '',
+        user_remarks: '',
         bank_name: '',
         account_holder_name: '',
         account_number: '',
+        discharge_summary: '',
+        ifsc_code: '',
         bank_doc: null,
+        final_bill: null,
+        showModal: false,
+        selectedField: '',
     });
 
     const toggleModal = (field) => {
@@ -160,82 +166,66 @@ const DischargeDetailScreen = ({ route, navigation }) => {
 
     const handleInputChange = (field, value) => {
 
-        if (field === 'pan_card') {
-            setErrors((prev) => ({
-                ...prev,
-                pan_card: value.length === 10 ? '' : 'PAN Card must be 10 digits',
-            }));
-        }
-
         setFormData((prev) => ({
             ...prev,
             [field]: value,
         }));
 
-        // setFormData({ ...formData, [field]: value });
     };
 
     const isFormValid = () => {
-        if (currentStep === 3) {
-            if (formData.loan_type == 1) {
-                const fieldNames = {
-                    passportPhoto: 'Patient Passort Photo',
-                    aadhaarFront: 'Aadhaar Card Front',
-                    aadhaarBack: 'Aadhaar Card Back',
-                    aadhaarBack: 'PAN Card',
-                    insuranceCard: 'Insurance Card',
-                    insuredAadhaarFront: 'Insured Aadhaar Card Front',
-                    insuredAadhaarBack: 'Insured Aadhaar Card Back',
-                    insuredPanCard: 'Insured Pan Card',
-                    insuredInsuranceCard: 'Insured Insurance Card',
-                };
+        const fieldNames = {
+            account_holder_name: 'Account Holder Name',
+            account_number: 'Account Number',
+            bank_name: 'Bank Name',
+            ifsc_code: 'IFSC Code',
+            bank_doc: 'Bank Document',
+            date_of_admission: 'Date Of Admission',
+            discharge_date: 'Discharge Date',
+            final_bill_amount: 'Final Bill Amount',
+            final_bill: 'Final Bill',
+        };
 
-                let requiredFields
+        const requiredFields = ['account_holder_name', 'account_number', 'bank_name', 'ifsc_code', 'bank_doc', 'date_of_admission', 'discharge_date', 'final_bill_amount', 'final_bill'];
+        const missingFields = [];
 
-                if (formData.relationship_with_insured != 'SELF') {
-
-                    requiredFields = ['passportPhoto', 'aadhaarFront', 'aadhaarBack', 'aadhaarBack', 'insuranceCard', 'insuredAadhaarFront', 'insuredAadhaarBack', 'insuredPanCard', 'insuredInsuranceCard'];
-                } else {
-                    requiredFields = ['passportPhoto', 'aadhaarFront', 'aadhaarBack', 'aadhaarBack', 'insuranceCard'];
-                }
-                const missingFields = [];
-
-                requiredFields.forEach(field => {
-                    if (!formData[field]) {
-                        missingFields.push(fieldNames[field]);
-                    }
-                });
-
-                if (missingFields.length > 0) {
-
-                    Vibration.vibrate(400);
-
-                    const message = `Please fill the following fields in Step 1: ${missingFields.join(', ')}`;
-                    Toast.show({
-                        type: 'error',
-                        position: 'top',
-                        text1: 'Form Incomplete',
-                        text2: message,
-                        visibilityTime: 5000,
-                        autoHide: true,
-                        draggable: true,
-                        topOffset: 100,
-                        bottomOffset: 40,
-                    });
-                    return false;
-                }
+        requiredFields.forEach(field => {
+            if (!formData[field] || formData[field].toString().trim() === '') {
+                missingFields.push(fieldNames[field]);
             }
+        });
+
+        if (missingFields.length > 0) {
+            Vibration.vibrate(400);
+
+            const message = `Please fill the following fields: ${missingFields.join(', ')}`;
+            Toast.show({
+                type: 'error',
+                position: 'top',
+                text1: 'Form Incomplete',
+                text2: message,
+                visibilityTime: 5000,
+                autoHide: true,
+                draggable: true,
+                topOffset: 100,
+                bottomOffset: 40,
+            });
+            return false;
         }
+
         return true;
     };
 
     const onFinsh = async () => {
         try {
-            console.log('Full formData:', formData); // Debug log
+
+            if (!isFormValid()) {
+                console.log('Form validation failed');
+                return; // Exit early if the form is invalid
+            }
 
             const formDataPayload = new FormData();
 
-            // Add other form fields
             Object.keys(formData).forEach(key => {
                 if (key !== 'showModal' && key !== 'selectedField' && formData[key] != null) {
                     if (formData[key] instanceof Date) {
@@ -280,36 +270,62 @@ const DischargeDetailScreen = ({ route, navigation }) => {
                 }
             }
 
-            const response = await dischargeDataUpdate(token, formDataPayload);
+            const response = await dischargeDataUpdate(token, formDataPayload, id);
 
-            console.log('Payload ready to send', response.data);
+            if (response.status == 200) {
+
+                Vibration.vibrate(400);
+
+                Toast.show({
+                    type: 'success',
+                    text1: 'Success',
+                    text2: 'Discharge and Bank Details processed successfully',
+                    visibilityTime: 5000,
+                    autoHide: true,
+                    draggable: true,
+                    topOffset: 100,
+                    bottomOffset: 40,
+                });
+
+                fetchDischargeData()
+            }
+
         } catch (error) {
             console.error('Upload error:', error);
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Something went wrong',
+                visibilityTime: 5000,
+                autoHide: true,
+                draggable: true,
+                topOffset: 100,
+                bottomOffset: 40,
+            });
+        }
+    }
+
+    const fetchDischargeData = async () => {
+
+        try {
+
+            const response = await getDischargeDetail(token, id);
+
+            if (response.status == 404) {
+                console.log('No Data Found');
+            }
+
+            setFormData((prevFormData) => ({
+                ...prevFormData,
+                ...response.data.data,
+            }));
+
+        } catch (error) {
+            console.log(error);
         }
     }
 
     useEffect(() => {
-
-        const fetchDischargeData = async () => {
-
-            try {
-
-                const response = await getDischargeDetail(token, id);
-
-                if (response.status == 404) {
-                    console.log('No Data Found');
-                }
-
-                setFormData((prevFormData) => ({
-                    ...prevFormData,
-                    ...response.data.data,
-                }));
-
-            } catch (error) {
-                console.log(error);
-            }
-        }
-
         if (token) {
             fetchDischargeData()
         }
@@ -327,7 +343,9 @@ const DischargeDetailScreen = ({ route, navigation }) => {
             </View>
             <View style={styles.contentContainer}>
                 <View style={{ backgroundColor: '#F0F8FF', borderRadius: 6, padding: 20 }}>
-                    <Text>Case Id: {id}</Text>
+
+                    <Text>{data.patient_id ? `Patient Id: MEDSCREDPA${data.patient_id}` : 'N/A'}</Text>
+                    <Text>{id ? `Case Id: MEDSCREDCA${id}` : 'N/A'}</Text>
                     <Text style={{ fontSize: 18, fontFamily: 'Lexend_500Medium' }}>{data.first_name} {data.middle_name ? data.middle_name : ''} {data.last_name}</Text>
                     <Text style={{ fontSize: 14, fontFamily: 'Lexend_300Light' }}>
                         {data.treatment_name ? `Treatment Name: ${data.treatment_name}` : 'Treatment Name: N/A'}
@@ -560,7 +578,7 @@ const DischargeDetailScreen = ({ route, navigation }) => {
                     </View>
                 </View>
             </Modal>
-
+            <Toast />
         </SafeAreaView>
     );
 }
@@ -704,7 +722,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#008AFF',
         paddingVertical: 12,
         paddingHorizontal: 18,
-        borderRadius: 8,
+        borderRadius: 5,
         marginVertical: 8,
         width: '100%',
         justifyContent: 'center',
@@ -713,6 +731,7 @@ const styles = StyleSheet.create({
     modalButtonText: {
         color: '#fff',
         fontSize: 16,
+        fontFamily: "Lexend_400Regular"
     },
     cancelButton: {
         backgroundColor: '#dc3545',
