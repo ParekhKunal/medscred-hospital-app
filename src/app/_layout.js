@@ -1,5 +1,8 @@
 import '../../global.css';
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -26,6 +29,7 @@ import DashboardScreen from "."
 import ProfileScreen from "./profile"
 import PatientsScreen from "./patients"
 import LoansScreen from "./discharge"
+import Splash from './splash';
 
 
 const Tab = createBottomTabNavigator();
@@ -240,7 +244,21 @@ export default RootLayout = () => {
 
 function AppNavigator() {
     const { token, user } = useAuth();
+    const [isLoading, setIsLoading] = useState(true);
 
+    useEffect(() => {
+
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 3000);
+
+        return () => clearTimeout(timer);
+
+    }, []);
+
+    if (isLoading) {
+        return <Splash />;
+    }
     if (!token) {
         return (
             <Stack.Navigator>

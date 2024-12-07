@@ -34,7 +34,7 @@ const LoginScreen = () => {
     const onPressLogin = async () => {
         setLoading(true);
         setError('');
-        console.log(email);
+        console.log(password);
 
         try {
             const success = await login(email, password);
@@ -122,9 +122,7 @@ const LoginScreen = () => {
                     </View>
                 </SafeAreaView>
             </KeyboardAvoidingView>
-
         </>
-
     );
 }
 
